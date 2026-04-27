@@ -1,0 +1,2274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inner Compass — Discover Who You Are</title>
+
+<!-- ============================================================
+     CONFIGURATION — REPLACE THESE WITH YOUR OWN VALUES
+     See README/deploy instructions for how to get them.
+     ============================================================ -->
+<script>
+  window.INNER_COMPASS_CONFIG = {
+    // Supabase (database) — get from supabase.com → Project Settings → API
+    SUPABASE_URL: "https://fffnnumeankjrrnysyjf.supabase.co/rest/v1/",
+    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZm5udW1lYW5ranJybnlzeWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjI0MjAsImV4cCI6MjA5Mjg5ODQyMH0.lT4iqkOE1MESrpHho3E_8rTkxKznnh1ierQ0gfBIk20",
+
+    // Google Analytics — get from analytics.google.com (Measurement ID, starts with G-)
+    GA_MEASUREMENT_ID: "G-52B0M8CNLD",
+
+    // Set to false until you've configured the values above
+    SAVE_RESULTS_ENABLED: true,
+    ANALYTICS_ENABLED: true
+  };
+</script>
+
+<!-- Google Analytics (loads only if enabled in config) -->
+<script>
+  if (window.INNER_COMPASS_CONFIG.ANALYTICS_ENABLED &&
+      window.INNER_COMPASS_CONFIG.GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.INNER_COMPASS_CONFIG.GA_MEASUREMENT_ID;
+    document.head.appendChild(gaScript);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', window.INNER_COMPASS_CONFIG.GA_MEASUREMENT_ID);
+  } else {
+    window.gtag = function(){}; // no-op if disabled
+  }
+</script>
+
+<!-- Supabase JS library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:opsz,wght@9..40,300..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1815;
+    --paper: #f5f0e6;
+    --paper-warm: #ede4d3;
+    --accent: #c4452d;
+    --accent-deep: #8a2e1d;
+    --gold: #d4a04c;
+    --sage: #6b7e5a;
+    --sky: #5a7a96;
+    --plum: #7a4a6b;
+    --line: #2a261f;
+    --shadow: rgba(26, 24, 21, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(196, 69, 45, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(212, 160, 76, 0.05) 0%, transparent 40%);
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ============ HEADER / NAV ============ */
+  .nav {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    position: relative;
+    display: inline-block;
+  }
+
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 14px;
+    background: var(--paper);
+    transform: translate(-50%, -50%) rotate(35deg);
+    transform-origin: center;
+  }
+
+  .nav-meta {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* ============ SCREENS ============ */
+  .screen {
+    display: none;
+    animation: fadeUp 0.6s ease-out;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ LANDING ============ */
+  .hero {
+    padding: 60px 0 40px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(42px, 7vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+    margin-bottom: 32px;
+    max-width: 900px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    max-width: 560px;
+    margin-bottom: 48px;
+    color: var(--ink);
+    opacity: 0.75;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    padding: 32px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 48px;
+  }
+
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* Age gate */
+  .age-gate {
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    padding: 40px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .age-gate::before {
+    content: '01';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--paper);
+    padding: 0 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .age-gate h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .age-gate p {
+    opacity: 0.7;
+    margin-bottom: 24px;
+    font-size: 15px;
+  }
+
+  .age-input-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .age-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 16px 20px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .age-input:focus {
+    background: var(--paper);
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+
+  .name-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 16px 20px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .name-input:focus {
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+
+  .btn {
+    padding: 16px 32px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-arrow {
+    display: inline-block;
+    transition: transform 0.25s;
+  }
+
+  .btn:hover:not(:disabled) .btn-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Three pillars */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--line);
+    margin-bottom: 60px;
+  }
+
+  .pillar {
+    padding: 32px 28px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+
+  .pillar:last-child { border-right: none; }
+
+  .pillar-num {
+    font-family: 'Fraunces', serif;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .pillar h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .pillar p {
+    font-size: 14px;
+    opacity: 0.7;
+    line-height: 1.55;
+  }
+
+  .age-error {
+    color: var(--accent);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ============ TEST SCREEN ============ */
+  .test-screen { padding: 40px 0 80px; }
+
+  .progress-wrap {
+    margin-bottom: 60px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  .question-card {
+    padding: 40px 0;
+    animation: fadeUp 0.4s ease-out;
+  }
+
+  .question-meta {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .question-text {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 48px;
+    max-width: 850px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 720px;
+  }
+
+  .option {
+    padding: 20px 24px;
+    background: transparent;
+    border: 1px solid var(--line);
+    text-align: left;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+  }
+
+  .option:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateX(8px);
+  }
+
+  .option-marker {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    opacity: 0.5;
+    letter-spacing: 0.1em;
+  }
+
+  .option.selected {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* ============ RESULTS SCREEN ============ */
+  .results-screen { padding: 40px 0 100px; }
+
+  .results-header {
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .results-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .results-eyebrow::before {
+    content: '✦';
+    color: var(--gold);
+  }
+
+  .results-name {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+
+  .results-name em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 300;
+  }
+
+  .results-tag {
+    font-size: 17px;
+    opacity: 0.7;
+    max-width: 600px;
+  }
+
+  /* Archetype card */
+  .archetype-card {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px;
+    margin-bottom: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .archetype-card::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+
+  .archetype-card::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    right: 100px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid rgba(245, 240, 230, 0.1);
+    border-radius: 50%;
+  }
+
+  .archetype-meta {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .archetype-name {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 400;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    position: relative;
+    z-index: 2;
+  }
+
+  .archetype-desc {
+    font-size: 17px;
+    opacity: 0.85;
+    max-width: 580px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Section heading */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .section-num {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* Strengths grid */
+  .strengths-grid {
+    display: grid;
+    gap: 0;
+    margin-bottom: 80px;
+    border: 1px solid var(--line);
+  }
+
+  .strength-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--line);
+    gap: 20px;
+  }
+
+  .strength-row:last-child { border-bottom: none; }
+
+  .strength-rank {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .strength-info h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .strength-info p {
+    font-size: 14px;
+    opacity: 0.65;
+  }
+
+  .strength-score {
+    text-align: right;
+  }
+
+  .strength-bar {
+    width: 80px;
+    height: 4px;
+    background: var(--line);
+    margin-left: auto;
+    margin-bottom: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .strength-bar-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+  }
+
+  .strength-pct {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  /* Career grid */
+  .career-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 80px;
+  }
+
+  .career-card {
+    padding: 28px;
+    border: 1px solid var(--line);
+    background: var(--paper-warm);
+    transition: all 0.25s;
+    position: relative;
+  }
+
+  .career-card:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateY(-4px);
+  }
+
+  .career-card:hover .career-tag { color: var(--paper); opacity: 0.7; }
+  .career-card:hover .career-why { opacity: 0.85; }
+
+  .career-tag {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+
+  .career-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .career-why {
+    font-size: 14px;
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
+  /* Industry tags */
+  .industry-section {
+    margin-bottom: 80px;
+  }
+
+  .industry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .industry-tag {
+    padding: 10px 20px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    transition: all 0.2s;
+    background: var(--paper);
+  }
+
+  .industry-tag:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  /* Path forward */
+  .path-section {
+    background: var(--paper-warm);
+    padding: 48px;
+    margin-bottom: 60px;
+    border: 1px solid var(--line);
+  }
+
+  .path-list {
+    list-style: none;
+    counter-reset: path;
+  }
+
+  .path-list li {
+    counter-increment: path;
+    padding: 20px 0 20px 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .path-list li:last-child { border-bottom: none; }
+
+  .path-list li::before {
+    content: counter(path, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 22px;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Action buttons */
+  .results-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* Footer */
+  .footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
+    margin-top: 80px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    text-align: center;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero-stats { grid-template-columns: 1fr; gap: 16px; }
+    .pillars { grid-template-columns: 1fr; }
+    .pillar { border-right: none; border-bottom: 1px solid var(--line); }
+    .pillar:last-child { border-bottom: none; }
+    .archetype-card, .path-section { padding: 28px; }
+    .age-gate { padding: 28px; }
+    .strength-row { grid-template-columns: 40px 1fr 70px; padding: 20px 16px; gap: 12px; }
+    .strength-info h4 { font-size: 18px; }
+    .strength-bar { width: 60px; }
+    .nav-buttons { flex-direction: column; gap: 12px; }
+    .btn, .btn-secondary { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="logo">
+      <span class="logo-mark"></span>
+      <span>Inner Compass</span>
+    </div>
+    <div class="nav-meta">EST. 2026 · A SELF-DISCOVERY INSTRUMENT</div>
+  </div>
+</nav>
+
+<!-- ============ LANDING SCREEN ============ -->
+<section id="screen-landing" class="screen active">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-eyebrow">For ages 10 to 100</div>
+      <h1>Who are you, <em>really</em>?</h1>
+      <p class="hero-sub">A modern psychometric assessment that helps you uncover your natural strengths, working style, and the careers where you're most likely to thrive — designed to grow with you, from your first daydreams to your fifth career change.</p>
+
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">36</div>
+          <div class="stat-label">Carefully crafted questions</div>
+        </div>
+        <div>
+          <div class="stat-num">8</div>
+          <div class="stat-label">Strength dimensions measured</div>
+        </div>
+        <div>
+          <div class="stat-num">12</div>
+          <div class="stat-label">Industry families explored</div>
+        </div>
+      </div>
+
+      <div class="age-gate">
+        <h2>Let's begin</h2>
+        <p>Tell us a little about yourself so we can ask the right questions.</p>
+        <div class="age-input-row">
+          <input type="text" id="user-name" class="name-input" placeholder="Your name (or nickname)" maxlength="30" />
+          <input type="number" id="user-age" class="age-input" placeholder="Your age" min="10" max="100" />
+        </div>
+        <div class="age-input-row" style="margin-top: 12px;">
+          <input type="email" id="user-email" class="name-input" placeholder="Email (optional — to save your results)" maxlength="100" />
+          <button class="btn" id="start-btn" disabled>
+            Begin the test <span class="btn-arrow">→</span>
+          </button>
+        </div>
+        <div class="age-error" id="age-error">Please enter an age between 10 and 100.</div>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar">
+          <span class="pillar-num">— I —</span>
+          <h3>It listens to your age</h3>
+          <p>Questions adapt to your life stage. A 12-year-old gets school and hobby scenarios. A 30-year-old gets workplace dilemmas. Same insight, right framing.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-num">— II —</span>
+          <h3>Built on three traditions</h3>
+          <p>Combines Holland's career interests, Gardner's multiple intelligences, and modern work-style research into one balanced view of who you are.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-num">— III —</span>
+          <h3>Real, useful answers</h3>
+          <p>You don't get a vague label. You get your top strengths, matched career paths, industries that fit, and a clear next step you can take this week.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEST SCREEN ============ -->
+<section id="screen-test" class="screen">
+  <div class="container test-screen">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="progress-label">Question 1 of 36</span>
+        <span id="progress-section">Section · Interests</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta">— Question 01 —</div>
+      <h2 class="question-text" id="question-text">Question loads here</h2>
+      <div class="options" id="options-container"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="prev-btn">← Previous</button>
+      <button class="btn-secondary" id="skip-btn">Skip this question</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS SCREEN ============ -->
+<section id="screen-results" class="screen">
+  <div class="container results-screen">
+    <div class="results-header">
+      <div class="results-eyebrow">Your personal compass report</div>
+      <h1 class="results-name">Hello, <em id="results-username">friend</em></h1>
+      <p class="results-tag" id="results-tag">Here's what we discovered about you.</p>
+    </div>
+
+    <div class="archetype-card">
+      <div class="archetype-meta">— Your Archetype —</div>
+      <h2 class="archetype-name" id="archetype-name">The Builder</h2>
+      <p class="archetype-desc" id="archetype-desc">Description loads here.</p>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">— I —</span>
+      <h3 class="section-title">Your top strengths</h3>
+      <span class="section-rule"></span>
+    </div>
+    <div class="strengths-grid" id="strengths-grid"></div>
+
+    <div class="section-head">
+      <span class="section-num">— II —</span>
+      <h3 class="section-title">Careers worth exploring</h3>
+      <span class="section-rule"></span>
+    </div>
+    <div class="career-grid" id="career-grid"></div>
+
+    <div class="section-head">
+      <span class="section-num">— III —</span>
+      <h3 class="section-title">Industries that fit you</h3>
+      <span class="section-rule"></span>
+    </div>
+    <div class="industry-section">
+      <div class="industry-tags" id="industry-tags"></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">— IV —</span>
+      <h3 class="section-title">Your path forward</h3>
+      <span class="section-rule"></span>
+    </div>
+    <div class="path-section">
+      <ol class="path-list" id="path-list"></ol>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn" id="restart-btn">Take the test again <span class="btn-arrow">↻</span></button>
+      <button class="btn-secondary" id="print-btn">Save / print report</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    Inner Compass · A self-discovery instrument · Results are guidance, not destiny
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   PSYCHOMETRIC FRAMEWORK
+   8 dimensions combining RIASEC + Multiple Intelligences + work-style
+   ============================================================ */
+
+const DIMENSIONS = {
+  CREATE:    { name: "Creative Expression",  desc: "Imagining, designing, and bringing new ideas to life" },
+  ANALYZE:   { name: "Analytical Thinking",  desc: "Solving puzzles, finding patterns, working with logic" },
+  HELP:      { name: "Helping Others",       desc: "Supporting, teaching, and improving people's lives" },
+  LEAD:      { name: "Leadership & Influence", desc: "Guiding teams, persuading, taking initiative" },
+  BUILD:     { name: "Hands-On Building",    desc: "Making, fixing, and working with the physical world" },
+  ORGANIZE:  { name: "Order & Structure",    desc: "Planning, organizing, and bringing systems to life" },
+  EXPLORE:   { name: "Discovery & Inquiry",  desc: "Investigating, researching, asking deep questions" },
+  CONNECT:   { name: "People & Communication", desc: "Connecting, storytelling, building relationships" }
+};
+
+/* ============================================================
+   QUESTION BANK — Each question has 3 age-tier wordings
+   tier: 0 = ages 10-14 (kid), 1 = ages 15-19 (teen), 2 = 20+ (adult)
+   options each map to a dimension with a weight (1-3)
+   ============================================================ */
+
+const QUESTIONS = [
+  // CREATE focus
+  {
+    id: 1,
+    section: "What lights you up",
+    tiers: [
+      "On a free Saturday, what would actually be FUN for you?",
+      "When you have a totally free Saturday, what do you choose to do?",
+      "On a weekend with no obligations, what activity pulls you in most?"
+    ],
+    options: [
+      { tiers: ["Drawing, building Lego, or making something cool", "Sketching, designing, or creating something new", "A creative project — design, writing, music, art"], dim: "CREATE", weight: 3 },
+      { tiers: ["Solving a tough puzzle or playing strategy games", "Working through a logic puzzle or strategy game", "Diving into a complex problem or analytical challenge"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Hanging out with friends and helping them with stuff", "Spending time with friends, helping them out", "Catching up with people, supporting someone who needs it"], dim: "HELP", weight: 3 },
+      { tiers: ["Fixing a broken bike or building a fort", "Tinkering with something — fixing, building, making", "Hands-on work — building, repairing, gardening, cooking"], dim: "BUILD", weight: 3 }
+    ]
+  },
+  {
+    id: 2,
+    section: "What lights you up",
+    tiers: [
+      "Your school has a talent show. What's your secret weapon?",
+      "If you joined a school showcase, what would you do?",
+      "If you had to perform a hidden talent at a community event, what would it be?"
+    ],
+    options: [
+      { tiers: ["Singing, dancing, or doing magic tricks", "Music, dance, drama — something performed", "A performance — music, comedy, storytelling"], dim: "CREATE", weight: 3 },
+      { tiers: ["Showing off a science experiment or invention", "Demonstrating a science project or invention", "Presenting an interesting idea or research finding"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Hosting and making everyone laugh", "MC'ing the event and keeping it fun", "Hosting — keeping the energy and crowd engaged"], dim: "LEAD", weight: 2 },
+      { tiers: ["Telling a really good story", "Performing spoken word or storytelling", "Storytelling, public speaking, or a written piece read aloud"], dim: "CONNECT", weight: 3 }
+    ]
+  },
+  {
+    id: 3,
+    section: "What lights you up",
+    tiers: [
+      "What kind of book or YouTube video do you actually enjoy?",
+      "What kind of content do you watch or read for fun?",
+      "What kind of content do you find yourself drawn to most?"
+    ],
+    options: [
+      { tiers: ["How things work — gadgets, animals, space", "Documentaries, science, how-things-work videos", "Deep dives — science, ideas, how the world works"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Stories about heroes and adventures", "Fiction — stories, novels, films with rich characters", "Literature, films, narrative writing"], dim: "CREATE", weight: 2 },
+      { tiers: ["Tutorials on how to make or build things", "DIY tutorials, build videos, craft channels", "Practical guides — building, making, doing"], dim: "BUILD", weight: 3 },
+      { tiers: ["Stories about real people and their lives", "Biographies, interviews, real-people stories", "Profiles, interviews, human-interest journalism"], dim: "CONNECT", weight: 3 }
+    ]
+  },
+
+  // ANALYZE
+  {
+    id: 4,
+    section: "How your mind works",
+    tiers: [
+      "When you get a new game or app, what do you do first?",
+      "When you start a new game or app, what's your first move?",
+      "When learning a new tool or system, what's your instinct?"
+    ],
+    options: [
+      { tiers: ["Just start clicking around and try stuff", "Dive in and figure it out by experimenting", "Jump in and learn by doing"], dim: "CREATE", weight: 2 },
+      { tiers: ["Read all the rules so I can play it perfectly", "Read the instructions thoroughly first", "Study the documentation before touching anything"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Watch someone good play it first", "Watch a tutorial from someone who's mastered it", "Find an expert walkthrough or course"], dim: "EXPLORE", weight: 2 },
+      { tiers: ["Ask a friend to play with me and figure it out together", "Try it with a friend and learn together", "Bring in a colleague and explore it as a team"], dim: "CONNECT", weight: 2 }
+    ]
+  },
+  {
+    id: 5,
+    section: "How your mind works",
+    tiers: [
+      "A puzzle has 1,000 pieces. How do you feel?",
+      "Someone gives you a 1,000-piece jigsaw puzzle. Reaction?",
+      "You're given a massive puzzle — physical or intellectual. Reaction?"
+    ],
+    options: [
+      { tiers: ["YES! I love that stuff", "Excited — I love the challenge", "Energized — the harder, the better"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Cool, but I'd rather do it with someone", "Fun, but better with company", "Interesting — but more rewarding as a shared effort"], dim: "CONNECT", weight: 2 },
+      { tiers: ["I'd rather build something than solve a puzzle", "I'd rather make something with my hands", "I'd prefer to be building something tangible"], dim: "BUILD", weight: 2 },
+      { tiers: ["Sounds boring. Can I draw instead?", "Not my thing — I'd rather create something", "I'd rather pour that time into a creative project"], dim: "CREATE", weight: 2 }
+    ]
+  },
+  {
+    id: 6,
+    section: "How your mind works",
+    tiers: [
+      "When something doesn't make sense to you, what do you do?",
+      "When you don't understand something, what's your move?",
+      "When you encounter something you don't fully understand, you tend to..."
+    ],
+    options: [
+      { tiers: ["Keep asking 'why?' until I get it", "Research and dig until I figure it out", "Investigate deeply until I genuinely understand"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Take it apart and look inside", "Try to break it down into pieces I can analyze", "Decompose it into parts and analyze each"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Ask an adult or my teacher", "Ask someone who knows more than me", "Reach out to an expert or mentor"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Try to solve it by helping someone else with it", "Help someone else with it — teaching helps me learn", "Teach it to someone — that's how I solidify it"], dim: "HELP", weight: 2 }
+    ]
+  },
+
+  // HELP
+  {
+    id: 7,
+    section: "Where you find meaning",
+    tiers: [
+      "Your friend is upset because they did badly on a test. What do you do?",
+      "Your friend is having a really rough week. What's your instinct?",
+      "Someone in your life is going through a hard time. What do you do?"
+    ],
+    options: [
+      { tiers: ["Sit with them and listen to how they feel", "Listen — really listen — and let them feel heard", "Hold space, listen without trying to fix it"], dim: "HELP", weight: 3 },
+      { tiers: ["Help them study so they do better next time", "Make a study plan with them for next time", "Help them set up a system to bounce back"], dim: "ORGANIZE", weight: 2 },
+      { tiers: ["Tell them a funny story to cheer them up", "Tell stories or jokes to lift them up", "Use humor and storytelling to shift their mood"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Make them something — like a card or treat", "Make them something thoughtful", "Cook for them, build them something, do something tangible"], dim: "BUILD", weight: 2 }
+    ]
+  },
+  {
+    id: 8,
+    section: "Where you find meaning",
+    tiers: [
+      "If you could fix ONE thing in the world, what would it be?",
+      "If you could change one thing in the world, what would you tackle?",
+      "If you had unlimited resources to change one thing, what would it be?"
+    ],
+    options: [
+      { tiers: ["Make sure no kid goes hungry or sad", "Reduce hunger, poverty, or inequality", "Tackle systemic poverty, hunger, or social inequality"], dim: "HELP", weight: 3 },
+      { tiers: ["Invent something that solves a big problem", "Invent something that solves a major issue", "Build technology that addresses a critical challenge"], dim: "BUILD", weight: 2 },
+      { tiers: ["Discover the cure for a disease", "Discover a cure or scientific breakthrough", "Lead research that produces a major discovery"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Make people kinder to each other", "Bring people together and reduce conflict", "Improve how people communicate and connect"], dim: "CONNECT", weight: 2 }
+    ]
+  },
+  {
+    id: 9,
+    section: "Where you find meaning",
+    tiers: [
+      "What feels REALLY good after you've done it?",
+      "What gives you that 'I did something that mattered' feeling?",
+      "What activity leaves you feeling like your time was meaningfully spent?"
+    ],
+    options: [
+      { tiers: ["Helping someone who really needed it", "Helping someone through a hard moment", "Making a real difference in someone's life"], dim: "HELP", weight: 3 },
+      { tiers: ["Finishing something I made all by myself", "Completing a project I created from scratch", "Shipping a creative work I'm proud of"], dim: "CREATE", weight: 2 },
+      { tiers: ["Winning a game or competition", "Winning a challenge or competition", "Achieving a goal I set against tough odds"], dim: "LEAD", weight: 2 },
+      { tiers: ["Figuring out something nobody else could", "Solving a problem others couldn't crack", "Cracking a hard problem nobody else could solve"], dim: "ANALYZE", weight: 3 }
+    ]
+  },
+
+  // LEAD
+  {
+    id: 10,
+    section: "How you work with others",
+    tiers: [
+      "Your group at school has to do a project. What role do you take?",
+      "When working on a group project, what role do you naturally take?",
+      "On a team project, what role tends to find you?"
+    ],
+    options: [
+      { tiers: ["I take charge and divide the work", "I organize the team and set the plan", "I lead — set direction, divide work, drive momentum"], dim: "LEAD", weight: 3 },
+      { tiers: ["I do the creative parts — designs and ideas", "I handle the creative side — visuals, ideas", "I take the creative work — design, ideation, presentation"], dim: "CREATE", weight: 2 },
+      { tiers: ["I do the research and find the facts", "I research and gather all the information", "I dig into the analysis and bring back insights"], dim: "EXPLORE", weight: 2 },
+      { tiers: ["I make sure everyone is doing okay and helping", "I keep the team morale up and check in on everyone", "I attend to team dynamics — make sure everyone's heard"], dim: "HELP", weight: 2 }
+    ]
+  },
+  {
+    id: 11,
+    section: "How you work with others",
+    tiers: [
+      "Picture yourself in 20 years. What are you DOING all day?",
+      "Imagine your dream working life in 10 years. What does it look like?",
+      "Imagine your ideal workday a decade from now. What are you doing?"
+    ],
+    options: [
+      { tiers: ["Running my own business or company", "Running my own venture or company", "Leading my own organization or business"], dim: "LEAD", weight: 3 },
+      { tiers: ["Working in a lab or studio creating things", "Working in a studio or lab building new things", "Working independently on craft, research, or creative output"], dim: "CREATE", weight: 2 },
+      { tiers: ["Helping people every day in some way", "Doing work that improves people's lives", "Working in a role that directly serves others"], dim: "HELP", weight: 3 },
+      { tiers: ["Traveling and discovering new things", "Exploring new places, ideas, or fields", "Doing work that takes me into the unknown"], dim: "EXPLORE", weight: 2 }
+    ]
+  },
+  {
+    id: 12,
+    section: "How you work with others",
+    tiers: [
+      "You have to convince a friend to try something new. How?",
+      "You want to convince someone to give your idea a chance. How?",
+      "You need to bring someone on board with a new idea. Your approach?"
+    ],
+    options: [
+      { tiers: ["Get really excited and pump them up", "Bring contagious energy and enthusiasm", "Lead with passion and inspire them"], dim: "LEAD", weight: 3 },
+      { tiers: ["Show them all the reasons why it makes sense", "Walk them through a logical case", "Build a clear, evidence-backed argument"], dim: "ANALYZE", weight: 2 },
+      { tiers: ["Tell them a story that shows why it's cool", "Tell a story that paints the picture", "Use narrative to bring the idea to life"], dim: "CONNECT", weight: 3 },
+      { tiers: ["Just show them — demonstrate it", "Show, don't tell — give them the experience", "Demonstrate it, prototype it, let them see it work"], dim: "BUILD", weight: 2 }
+    ]
+  },
+
+  // BUILD
+  {
+    id: 13,
+    section: "How you like to work",
+    tiers: [
+      "Which class would you actually look forward to?",
+      "Which subject genuinely interests you most?",
+      "Which kind of learning would you sign up for in your free time?"
+    ],
+    options: [
+      { tiers: ["Shop class — building actual stuff with tools", "Engineering, woodworking, mechanics", "Hands-on craft — woodworking, mechanics, construction"], dim: "BUILD", weight: 3 },
+      { tiers: ["Art, music, or drama class", "Art, design, music, or theater", "Studio arts, music, design, or performance"], dim: "CREATE", weight: 3 },
+      { tiers: ["Science class with experiments", "Lab science with real experiments", "Scientific research with hands-on experimentation"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Math because it makes sense", "Math — clean, logical, satisfying", "Mathematics, statistics, formal reasoning"], dim: "ANALYZE", weight: 3 }
+    ]
+  },
+  {
+    id: 14,
+    section: "How you like to work",
+    tiers: [
+      "You're given a big empty box. What do you do?",
+      "You inherit a tool you've never used. What's your first move?",
+      "You're handed a piece of equipment you've never operated. You..."
+    ],
+    options: [
+      { tiers: ["Turn it into a fort, robot, or spaceship", "Convert it or build something with it", "Repurpose it into a project or build"], dim: "BUILD", weight: 3 },
+      { tiers: ["Decorate it and turn it into art", "Transform it into something creative or beautiful", "Use it as material for a creative work"], dim: "CREATE", weight: 2 },
+      { tiers: ["Take it apart to see how it works", "Study how it works and what it can do", "Investigate its mechanism and capabilities"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Organize all my stuff inside it", "Use it to organize something in my life", "Put it to use in a system I'm building"], dim: "ORGANIZE", weight: 3 }
+    ]
+  },
+  {
+    id: 15,
+    section: "How you like to work",
+    tiers: [
+      "What feels most like 'play' to you?",
+      "What feels effortless and energizing for you?",
+      "What kind of work feels like play to you?"
+    ],
+    options: [
+      { tiers: ["Making things with my hands", "Working with my hands — building, crafting", "Tactile, hands-on creation"], dim: "BUILD", weight: 3 },
+      { tiers: ["Reading or watching stories", "Getting lost in stories and ideas", "Immersing myself in narrative and ideas"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Running around and being active", "Physical activity, sports, movement", "Active, embodied work — movement, the outdoors"], dim: "BUILD", weight: 2 },
+      { tiers: ["Quietly figuring out a hard problem", "Sitting with a hard problem until I crack it", "Deep focus on a complex problem"], dim: "ANALYZE", weight: 3 }
+    ]
+  },
+
+  // ORGANIZE
+  {
+    id: 16,
+    section: "How you like to work",
+    tiers: [
+      "Your room — be honest. What's it like?",
+      "Your living space — what's the truth about it?",
+      "Your workspace — what does it really look like?"
+    ],
+    options: [
+      { tiers: ["Super neat — everything has a place", "Highly organized — I love a clean system", "Meticulously organized — systems for everything"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Creative chaos — I know where stuff is", "Creative chaos that makes sense to me", "Productive disorder — chaos to others, navigable to me"], dim: "CREATE", weight: 2 },
+      { tiers: ["Full of projects I'm working on", "Filled with projects in various stages", "Always mid-build — projects everywhere"], dim: "BUILD", weight: 2 },
+      { tiers: ["Books, posters, things I've collected", "Books and meaningful things I've collected", "Curated — books, art, objects with meaning"], dim: "EXPLORE", weight: 2 }
+    ]
+  },
+  {
+    id: 17,
+    section: "How you like to work",
+    tiers: [
+      "Planning a birthday party — how do you do it?",
+      "Planning an event — what's your style?",
+      "Organizing an event — what's your method?"
+    ],
+    options: [
+      { tiers: ["Make a list with every single detail", "Create a detailed plan with every step", "Build a comprehensive plan, timeline, checklist"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Come up with the coolest theme ever", "Build it around a powerful theme or concept", "Design the experience around a strong creative concept"], dim: "CREATE", weight: 3 },
+      { tiers: ["Figure out who would have the most fun together", "Curate the guest list for the right vibe", "Engineer the social mix carefully"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Just wing it and see what happens", "Keep it loose and improvise", "Set the conditions and let it unfold"], dim: "EXPLORE", weight: 1 }
+    ]
+  },
+  {
+    id: 18,
+    section: "How you like to work",
+    tiers: [
+      "Which superpower would you actually want?",
+      "If you could have one real-life superpower, which?",
+      "If you could possess one extraordinary ability, what would serve you best?"
+    ],
+    options: [
+      { tiers: ["Healing people who are hurt", "Healing — making people whole again", "The ability to heal and restore"], dim: "HELP", weight: 3 },
+      { tiers: ["Knowing every fact in the world", "Knowing the answer to any question", "Perfect knowledge — instant understanding of anything"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Building anything just by thinking it", "Manifesting anything you can imagine", "The power to bring any creation into being"], dim: "CREATE", weight: 3 },
+      { tiers: ["Reading minds so you understand people", "Seeing what people really feel and think", "Deep insight into others' inner worlds"], dim: "CONNECT", weight: 3 }
+    ]
+  },
+
+  // EXPLORE
+  {
+    id: 19,
+    section: "What lights you up",
+    tiers: [
+      "When you see something you've never seen before, you feel...",
+      "Encountering something completely new makes you feel...",
+      "When you stumble onto an unfamiliar field or topic, you feel..."
+    ],
+    options: [
+      { tiers: ["Super curious — I HAVE to know more", "Insatiably curious — I dig in immediately", "Driven to investigate — I have to understand it"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Inspired to make something based on it", "Inspired to create something around it", "Creatively sparked — it becomes raw material"], dim: "CREATE", weight: 2 },
+      { tiers: ["Excited to share it with my friends", "Excited to tell people about it", "Compelled to share it and discuss it"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Curious about how it works inside", "Want to understand its inner mechanics", "Drawn to take it apart and analyze it"], dim: "ANALYZE", weight: 2 }
+    ]
+  },
+  {
+    id: 20,
+    section: "What lights you up",
+    tiers: [
+      "Free trip anywhere in the world — where to?",
+      "Anywhere in the world, all expenses paid — where?",
+      "If you could spend a month anywhere learning something, where?"
+    ],
+    options: [
+      { tiers: ["Somewhere wild — jungles, mountains, ocean", "Somewhere wild and remote — nature, wilderness", "A remote, untamed place — wilderness, expedition"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["A big city with lots of art and food", "A creative city — Paris, Tokyo, Barcelona", "A cultural capital rich in art, design, history"], dim: "CREATE", weight: 2 },
+      { tiers: ["A place that needs help, to volunteer", "Somewhere I could volunteer and contribute", "A place where I can do meaningful service work"], dim: "HELP", weight: 3 },
+      { tiers: ["Somewhere with cool architecture and museums", "A place with great museums and architecture", "A place with rich intellectual and cultural depth"], dim: "EXPLORE", weight: 2 }
+    ]
+  },
+  {
+    id: 21,
+    section: "What lights you up",
+    tiers: [
+      "What kind of question keeps you thinking?",
+      "What sort of question really hooks your mind?",
+      "What kind of question keeps you up at night, in a good way?"
+    ],
+    options: [
+      { tiers: ["How does the universe work?", "How does the universe actually work?", "Fundamental questions — physics, consciousness, origins"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["How can I make this thing better?", "How could this be designed better?", "How can this be redesigned for greater impact?"], dim: "CREATE", weight: 2 },
+      { tiers: ["Why do people do what they do?", "Why do people behave the way they do?", "What drives human behavior and motivation?"], dim: "CONNECT", weight: 3 },
+      { tiers: ["How can I help someone with this?", "How can this knowledge help someone?", "How can I apply this to make life better for others?"], dim: "HELP", weight: 2 }
+    ]
+  },
+
+  // CONNECT
+  {
+    id: 22,
+    section: "How you work with others",
+    tiers: [
+      "Big party with lots of people — how do you feel?",
+      "A big social event — how do you feel about it?",
+      "A large social or networking event — how do you actually feel?"
+    ],
+    options: [
+      { tiers: ["AMAZING — I'll talk to everyone", "Energized — I love meeting new people", "Energized — I light up around people"], dim: "CONNECT", weight: 3 },
+      { tiers: ["I'd rather hang with one or two close friends", "I'd rather have deep talks with a few people", "I'd rather go deep with two or three people"], dim: "HELP", weight: 2 },
+      { tiers: ["I'd rather be home making something cool", "I'd prefer to be home working on something", "I'd genuinely rather be home creating"], dim: "CREATE", weight: 2 },
+      { tiers: ["I'd watch people and figure out how it all works", "I'd people-watch and analyze the dynamics", "I'd observe the social dynamics with interest"], dim: "ANALYZE", weight: 2 }
+    ]
+  },
+  {
+    id: 23,
+    section: "How you work with others",
+    tiers: [
+      "Your friend group — what role do you play in it?",
+      "In your circle of friends, what role do you tend to play?",
+      "Among your closest people, what role naturally falls to you?"
+    ],
+    options: [
+      { tiers: ["The funny one who tells stories", "The storyteller — I keep things interesting", "The communicator — I tell the stories, hold the threads"], dim: "CONNECT", weight: 3 },
+      { tiers: ["The leader who makes plans happen", "The one who actually makes plans happen", "The organizer — I make things happen"], dim: "LEAD", weight: 3 },
+      { tiers: ["The advisor everyone goes to with problems", "The one people come to for advice", "The advisor people seek out for hard moments"], dim: "HELP", weight: 3 },
+      { tiers: ["The thinker who notices things others don't", "The observer who sees what others miss", "The thoughtful one — I notice what others overlook"], dim: "ANALYZE", weight: 2 }
+    ]
+  },
+  {
+    id: 24,
+    section: "How you work with others",
+    tiers: [
+      "If you had a YouTube channel, what would it be about?",
+      "If you started a content channel, what would it be?",
+      "If you launched a podcast or channel, what would it focus on?"
+    ],
+    options: [
+      { tiers: ["Telling stories or interviewing cool people", "Interviews, storytelling, conversations", "Long-form interviews and human stories"], dim: "CONNECT", weight: 3 },
+      { tiers: ["How to make or build amazing things", "Building, making, DIY tutorials", "Craft, building, design tutorials"], dim: "BUILD", weight: 3 },
+      { tiers: ["Teaching kids about science or how stuff works", "Explaining science, history, or ideas", "Educational deep-dives — science, philosophy, ideas"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Helping people solve their problems", "Self-improvement, helping people grow", "Coaching, advice, self-development"], dim: "HELP", weight: 3 }
+    ]
+  },
+
+  // Mixed reflection questions
+  {
+    id: 25,
+    section: "Where you find meaning",
+    tiers: [
+      "If you were a grown-up, what would matter most to you?",
+      "What do you want to be most known for as an adult?",
+      "What would you most want to be known for in your work?"
+    ],
+    options: [
+      { tiers: ["Making the world a better place", "Making a positive difference in people's lives", "Leaving things better than I found them"], dim: "HELP", weight: 3 },
+      { tiers: ["Creating something amazing that lasts", "Making something original that lasts", "Producing creative work of lasting value"], dim: "CREATE", weight: 3 },
+      { tiers: ["Discovering something nobody knew before", "Discovering or learning something new", "Pushing the boundaries of what's known"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Leading something big and important", "Leading a meaningful organization or movement", "Leading a meaningful institution or movement"], dim: "LEAD", weight: 3 }
+    ]
+  },
+  {
+    id: 26,
+    section: "How your mind works",
+    tiers: [
+      "When you have to remember something, what works best?",
+      "What's the easiest way for you to actually remember something?",
+      "What helps you retain information best?"
+    ],
+    options: [
+      { tiers: ["Drawing it or making a picture in my head", "Visualizing it or sketching it out", "Visual representations — diagrams, mind maps"], dim: "CREATE", weight: 2 },
+      { tiers: ["Saying it out loud or making it a song", "Saying it aloud or turning it into a story", "Talking it through, narrating it"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Writing it down very neatly", "Writing it down in an organized way", "Writing structured notes I can revisit"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Doing it with my hands a few times", "Practicing it with my hands repeatedly", "Repetition with hands-on practice"], dim: "BUILD", weight: 2 }
+    ]
+  },
+  {
+    id: 27,
+    section: "How you like to work",
+    tiers: [
+      "Pick the BEST way to spend an afternoon:",
+      "Choose your ideal afternoon:",
+      "Choose how you'd most like to spend a free afternoon:"
+    ],
+    options: [
+      { tiers: ["Inventing or building something new", "Designing and prototyping a new idea", "Working on a personal creative or build project"], dim: "BUILD", weight: 3 },
+      { tiers: ["Reading or learning about something fascinating", "Reading deeply about something fascinating", "Reading or studying something that captivates me"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Hanging out and helping a friend with something", "Helping a friend through something", "Spending real time supporting someone"], dim: "HELP", weight: 3 },
+      { tiers: ["Organizing my stuff so it's perfect", "Reorganizing or refining a system", "Refining a system or process I care about"], dim: "ORGANIZE", weight: 3 }
+    ]
+  },
+  {
+    id: 28,
+    section: "Where you find meaning",
+    tiers: [
+      "What makes you feel REALLY proud?",
+      "What makes you feel genuinely proud?",
+      "What achievement makes you feel deeply proud?"
+    ],
+    options: [
+      { tiers: ["When I figure out something hard", "When I crack a difficult problem", "Solving something hard that others gave up on"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["When something I made turns out great", "When something I created comes out beautifully", "Producing creative work that exceeds my own expectations"], dim: "CREATE", weight: 3 },
+      { tiers: ["When I help someone feel better", "When I help someone through something hard", "Making a real difference for someone in a hard moment"], dim: "HELP", weight: 3 },
+      { tiers: ["When I lead my team to win", "When I rally people and we succeed together", "Leading a team to accomplish something significant"], dim: "LEAD", weight: 3 }
+    ]
+  },
+  {
+    id: 29,
+    section: "How your mind works",
+    tiers: [
+      "Which sounds MOST fun to you?",
+      "Which option sounds most appealing?",
+      "Which scenario most appeals to you?"
+    ],
+    options: [
+      { tiers: ["Designing your own video game", "Designing a video game or app", "Designing software or a digital product"], dim: "CREATE", weight: 3 },
+      { tiers: ["Doing experiments in a lab", "Running experiments in a lab", "Doing original research in a lab or field"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Coaching a team to win a championship", "Coaching a team to victory", "Coaching or mentoring a high-performing team"], dim: "LEAD", weight: 3 },
+      { tiers: ["Building a treehouse from scratch", "Building something from raw materials", "Building something physical and lasting from scratch"], dim: "BUILD", weight: 3 }
+    ]
+  },
+  {
+    id: 30,
+    section: "How you work with others",
+    tiers: [
+      "What's something people often say about you?",
+      "What do people most often say about you?",
+      "What feedback do you hear most often from others?"
+    ],
+    options: [
+      { tiers: ["You're really creative and have cool ideas", "You're so creative — you see things differently", "You're remarkably creative and original"], dim: "CREATE", weight: 3 },
+      { tiers: ["You're really smart and figure things out", "You're so smart — you grasp things fast", "You're sharp — you cut through complexity"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["You're so kind and you help everyone", "You're really kind — people trust you", "You're deeply kind, and people open up to you"], dim: "HELP", weight: 3 },
+      { tiers: ["You're a leader — people follow you", "You're a natural leader — people follow you", "You have natural authority — people listen"], dim: "LEAD", weight: 3 }
+    ]
+  },
+  {
+    id: 31,
+    section: "What lights you up",
+    tiers: [
+      "Pick your dream weekend job (when you're old enough):",
+      "Pick your dream summer or weekend job:",
+      "Pick your dream side project or weekend gig:"
+    ],
+    options: [
+      { tiers: ["Working at an art studio or theater", "Working at an art studio, gallery, or theater", "A creative studio — design, art, production"], dim: "CREATE", weight: 3 },
+      { tiers: ["Helping at an animal shelter or hospital", "Helping at a shelter, clinic, or community center", "Service work at a clinic, shelter, or NGO"], dim: "HELP", weight: 3 },
+      { tiers: ["Working at a science museum or zoo", "Working at a museum, lab, or research center", "Research assistant role at a lab or institute"], dim: "EXPLORE", weight: 3 },
+      { tiers: ["Helping run a business or shop", "Helping run a small business", "Building or running a small business"], dim: "LEAD", weight: 3 }
+    ]
+  },
+  {
+    id: 32,
+    section: "How your mind works",
+    tiers: [
+      "When you watch a movie, what do you notice most?",
+      "Watching a film, what catches your attention?",
+      "When watching a film, what draws your attention?"
+    ],
+    options: [
+      { tiers: ["The visuals — colors, sets, costumes", "Cinematography, sets, design, visual storytelling", "Direction, cinematography, production design"], dim: "CREATE", weight: 3 },
+      { tiers: ["The plot — does it all add up?", "The plot's logic and structure", "Narrative architecture and internal consistency"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["The characters and how they feel", "The characters and emotional arcs", "Character development and emotional truth"], dim: "CONNECT", weight: 3 },
+      { tiers: ["The cool things they built or made", "How they built the props and effects", "The craft — practical effects, sets, builds"], dim: "BUILD", weight: 2 }
+    ]
+  },
+  {
+    id: 33,
+    section: "How you like to work",
+    tiers: [
+      "If you could change one thing in your school, you would...",
+      "If you could change one thing about your school or workplace...",
+      "If you could redesign one thing about your work environment..."
+    ],
+    options: [
+      { tiers: ["Make classes more creative and fun", "Make it more creative and inspiring", "Build more creative space into the daily routine"], dim: "CREATE", weight: 2 },
+      { tiers: ["Make a club to help younger kids", "Start a peer support or mentoring program", "Establish a mentoring or community program"], dim: "HELP", weight: 3 },
+      { tiers: ["Make everything more organized and clear", "Make systems clearer and more efficient", "Streamline systems and improve clarity"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Have more hands-on projects and labs", "Have more hands-on projects and real work", "Build in more applied, hands-on work"], dim: "BUILD", weight: 3 }
+    ]
+  },
+  {
+    id: 34,
+    section: "Where you find meaning",
+    tiers: [
+      "Imagine you're really good at something. What is it?",
+      "Imagine you've mastered something. What is it?",
+      "If you could be world-class at one thing, what would it be?"
+    ],
+    options: [
+      { tiers: ["A musical instrument or a sport", "An instrument, a sport, or a craft", "A craft, instrument, or physical discipline"], dim: "BUILD", weight: 3 },
+      { tiers: ["Speaking many languages", "Speaking multiple languages fluently", "Communication across multiple languages and cultures"], dim: "CONNECT", weight: 3 },
+      { tiers: ["Math or science problems", "A scientific or technical field", "A specialized scientific or technical domain"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Writing or making art", "Writing, painting, or filmmaking", "A serious creative discipline — writing, art, film"], dim: "CREATE", weight: 3 }
+    ]
+  },
+  {
+    id: 35,
+    section: "How you work with others",
+    tiers: [
+      "What kind of teacher would you actually love?",
+      "What kind of teacher or mentor brings out your best?",
+      "What kind of leader or mentor brings out your best work?"
+    ],
+    options: [
+      { tiers: ["One who lets you build and try things", "One who lets you experiment and build", "One who gives you the room to try and build"], dim: "BUILD", weight: 3 },
+      { tiers: ["One who makes you think really hard", "One who challenges your thinking deeply", "One who pushes you intellectually"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["One who really cares about you as a person", "One who actually cares who you are as a person", "One who sees you as a whole person"], dim: "HELP", weight: 3 },
+      { tiers: ["One who tells amazing stories", "One who's a brilliant storyteller", "One whose ideas live on through powerful stories"], dim: "CONNECT", weight: 3 }
+    ]
+  },
+  {
+    id: 36,
+    section: "Where you find meaning",
+    tiers: [
+      "Last question! What's the BEST kind of compliment to get?",
+      "Final question — what's the most meaningful compliment you can receive?",
+      "Final question — what compliment would mean the most to you?"
+    ],
+    options: [
+      { tiers: ["You're a really good person", "You made me feel truly seen and understood", "You changed how I see something — or myself"], dim: "HELP", weight: 3 },
+      { tiers: ["You're really smart", "You made me think in a completely new way", "You think with rare clarity and depth"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["You make the COOLEST stuff", "You make work I've never seen before", "Your creative work is genuinely original"], dim: "CREATE", weight: 3 },
+      { tiers: ["I'd follow you anywhere", "I'd follow your lead anywhere", "I'd trust your leadership in any room"], dim: "LEAD", weight: 3 }
+    ]
+  }
+];
+
+/* ============================================================
+   ARCHETYPES — top 2 dimensions combined
+   ============================================================ */
+const ARCHETYPES = {
+  "CREATE+ANALYZE": { name: "The Inventor", desc: "You see what isn't yet there — and you have the rigor to actually build it. You're at your best when you can dream up something novel, then engineer it into reality with care and precision." },
+  "CREATE+HELP": { name: "The Storyteller-Healer", desc: "You use creativity as a way to reach people. Whether through art, writing, or design, your work moves others. You're drawn to creative work that makes someone's life softer or richer." },
+  "CREATE+LEAD": { name: "The Visionary", desc: "You see possibilities others don't — and you have the magnetism to gather people around them. You belong at the front of creative endeavors, casting vision and building movements." },
+  "CREATE+BUILD": { name: "The Maker", desc: "You think with your hands. You don't just imagine — you bring things into being. From craft to engineering to design, you find deep meaning in tangible creation." },
+  "CREATE+ORGANIZE": { name: "The Designer", desc: "You bring beauty and order together. Where others see chaos, you see how to compose it into something elegant and functional. Design, in every form, is your native language." },
+  "CREATE+EXPLORE": { name: "The Artist-Scholar", desc: "You're driven by both wonder and expression. You want to discover new ideas — and translate them into something beautiful. Research, art, and inquiry weave together for you." },
+  "CREATE+CONNECT": { name: "The Storyteller", desc: "You move people with words, images, and ideas. You understand that great stories shape culture — and you have the gift to tell them in ways others can't." },
+  "ANALYZE+HELP": { name: "The Diagnostician", desc: "You combine sharp thinking with genuine care. You see problems clearly and help others through them — whether in medicine, counseling, or any field where understanding makes lives better." },
+  "ANALYZE+LEAD": { name: "The Strategist", desc: "You see the system, the patterns, the moves three steps ahead. You belong in roles where complex decisions need a sharp mind and a steady hand." },
+  "ANALYZE+BUILD": { name: "The Engineer", desc: "You're at home where logic meets the physical world. You design systems and structures that actually work. Precision and craft are your shared loves." },
+  "ANALYZE+ORGANIZE": { name: "The Architect", desc: "You bring order to complexity. You design systems — of thought, of process, of structure — that hold up under pressure and scale beautifully." },
+  "ANALYZE+EXPLORE": { name: "The Researcher", desc: "Deep questions are your home turf. You're drawn to the frontier of what's known, with the patience and rigor to push it forward by inches." },
+  "ANALYZE+CONNECT": { name: "The Translator", desc: "You take complex ideas and make them land for real people. You belong in roles that bridge worlds — technical and human, expert and beginner." },
+  "HELP+LEAD": { name: "The Mentor", desc: "You lead by lifting others. People grow under your guidance because you actually see them. You're built for roles that develop human potential." },
+  "HELP+BUILD": { name: "The Healer-Maker", desc: "You help people through your hands — through craft, care, food, healing arts, or service work that improves lives in tangible, physical ways." },
+  "HELP+ORGANIZE": { name: "The Caregiver", desc: "You make the structures that take care of people — programs, systems, services that scale kindness. You belong where empathy meets operational rigor." },
+  "HELP+EXPLORE": { name: "The Healer-Scholar", desc: "You want to understand human beings deeply — and then use what you learn to make life better. Research, psychology, medicine, education are your territory." },
+  "HELP+CONNECT": { name: "The Counselor", desc: "You're someone people open up to. Your gift is presence — the kind of attention that lets others find their own answers. You belong in deeply relational work." },
+  "LEAD+BUILD": { name: "The Founder", desc: "You see what could be built and you have the drive to actually build it. Whether a company, a movement, or a craft, you start things and see them through." },
+  "LEAD+ORGANIZE": { name: "The Operator", desc: "You make things run. Vision is fine, but you're the one who turns it into systems, teams, and execution. You're built for command and operations." },
+  "LEAD+EXPLORE": { name: "The Pioneer", desc: "You go where there's no map — and bring others with you. You're drawn to frontier work, new ventures, and bold expeditions of all kinds." },
+  "LEAD+CONNECT": { name: "The Diplomat", desc: "You move people through influence and relationship. You belong in roles that need both political instincts and a real way with humans." },
+  "BUILD+ORGANIZE": { name: "The Craftsman", desc: "You combine skilled hands with disciplined process. Whether woodworking, programming, or surgery, you build with the patience and precision that mastery demands." },
+  "BUILD+EXPLORE": { name: "The Field Worker", desc: "You belong where the work happens — outdoors, in the lab, on the site, in the field. Hands-on discovery is where you come alive." },
+  "BUILD+CONNECT": { name: "The Coach", desc: "You teach through doing. You're at your best when you can show someone how — physically demonstrating skill while building real relationship." },
+  "ORGANIZE+EXPLORE": { name: "The Curator", desc: "You bring order to vast bodies of knowledge or material. You belong in libraries, archives, museums, research operations — anywhere meaning is preserved and structured." },
+  "ORGANIZE+CONNECT": { name: "The Producer", desc: "You make creative or social work actually happen. Behind every great event, show, or campaign, there's someone like you making the gears turn." },
+  "EXPLORE+CONNECT": { name: "The Journalist", desc: "You investigate and translate. You go find the truth — and you have the gift to bring it back in stories people actually want to hear." }
+};
+
+const FALLBACK_ARCHETYPE = { name: "The Original", desc: "You don't fit a single mold — and that's a strength. Your profile shows real range across multiple dimensions, which means you can adapt, bridge worlds, and find your own path. Your work is to choose where to go deep." };
+
+/* ============================================================
+   CAREER LIBRARY — by primary dimension
+   Format: [name, why, ageGate (kid-friendly note for under-15)]
+   ============================================================ */
+const CAREERS = {
+  CREATE: [
+    { name: "Graphic Designer", why: "Crafts visual communication for brands, products, publications" },
+    { name: "Architect", why: "Designs buildings and spaces where people live and work" },
+    { name: "UX / Product Designer", why: "Shapes how digital products feel and function" },
+    { name: "Filmmaker / Director", why: "Tells stories through moving image" },
+    { name: "Writer / Novelist", why: "Crafts stories, articles, and books that move people" },
+    { name: "Animator", why: "Brings characters and worlds to life on screen" },
+    { name: "Fashion Designer", why: "Designs clothing as wearable creative expression" },
+    { name: "Music Producer", why: "Creates and shapes the sound of recorded music" }
+  ],
+  ANALYZE: [
+    { name: "Data Scientist", why: "Finds meaningful patterns in large datasets" },
+    { name: "Software Engineer", why: "Builds the logic and systems behind software" },
+    { name: "Mathematician", why: "Works at the deep end of formal reasoning" },
+    { name: "Quantitative Analyst", why: "Applies math to financial markets" },
+    { name: "Cryptographer", why: "Designs systems that keep information secure" },
+    { name: "Economist", why: "Studies how resources, decisions, and markets work" },
+    { name: "AI / Machine Learning Engineer", why: "Builds systems that learn from data" },
+    { name: "Statistician", why: "Designs studies and interprets numerical evidence" }
+  ],
+  HELP: [
+    { name: "Doctor / Physician", why: "Diagnoses and treats people's health" },
+    { name: "Therapist / Counselor", why: "Helps people through emotional and mental struggles" },
+    { name: "Teacher / Educator", why: "Shapes the next generation through knowledge and care" },
+    { name: "Nurse", why: "Provides hands-on care at the front line of medicine" },
+    { name: "Social Worker", why: "Supports families and communities through hard moments" },
+    { name: "Veterinarian", why: "Cares for the health of animals" },
+    { name: "Nonprofit Director", why: "Leads organizations that solve social problems" },
+    { name: "Occupational Therapist", why: "Helps people regain or build life skills" }
+  ],
+  LEAD: [
+    { name: "Entrepreneur / Founder", why: "Starts and builds new businesses or ventures" },
+    { name: "Executive / CEO", why: "Leads organizations through complex decisions" },
+    { name: "Politician / Civic Leader", why: "Shapes public policy and community direction" },
+    { name: "Sports Coach", why: "Develops athletes and leads teams to perform" },
+    { name: "Project Manager", why: "Leads teams to deliver complex initiatives" },
+    { name: "Lawyer", why: "Argues cases and shapes legal outcomes" },
+    { name: "Investment Banker", why: "Leads large financial deals and strategy" },
+    { name: "Sales Director", why: "Leads teams that drive revenue and growth" }
+  ],
+  BUILD: [
+    { name: "Civil Engineer", why: "Designs and builds bridges, roads, infrastructure" },
+    { name: "Mechanical Engineer", why: "Designs machines and physical systems" },
+    { name: "Carpenter / Woodworker", why: "Builds with wood — craft, furniture, structures" },
+    { name: "Surgeon", why: "Combines deep knowledge with precise hands-on work" },
+    { name: "Chef", why: "Creates food as both craft and experience" },
+    { name: "Pilot", why: "Operates aircraft with skill and judgment" },
+    { name: "Robotics Engineer", why: "Builds machines that move, sense, and act" },
+    { name: "Farmer / Agriculturalist", why: "Works the land to grow food and care for ecosystems" }
+  ],
+  ORGANIZE: [
+    { name: "Operations Manager", why: "Runs the engine room of any organization" },
+    { name: "Accountant", why: "Brings precision and clarity to financial reality" },
+    { name: "Logistics Manager", why: "Designs how goods and people move through the world" },
+    { name: "Event Producer", why: "Orchestrates complex live experiences" },
+    { name: "Auditor", why: "Verifies systems and finds what's hidden" },
+    { name: "Librarian / Information Scientist", why: "Organizes knowledge for the world to access" },
+    { name: "Urban Planner", why: "Designs how cities are organized to function" },
+    { name: "Supply Chain Analyst", why: "Optimizes how materials flow globally" }
+  ],
+  EXPLORE: [
+    { name: "Research Scientist", why: "Pushes the boundaries of human knowledge" },
+    { name: "Anthropologist", why: "Studies cultures and what makes us human" },
+    { name: "Astronomer", why: "Investigates the universe at the largest scales" },
+    { name: "Marine Biologist", why: "Studies life in the ocean" },
+    { name: "Historian", why: "Reconstructs and interprets the past" },
+    { name: "Investigative Journalist", why: "Digs deep to expose truth" },
+    { name: "Archaeologist", why: "Uncovers human history through physical evidence" },
+    { name: "Wildlife Biologist", why: "Studies animals in their natural habitats" }
+  ],
+  CONNECT: [
+    { name: "Journalist", why: "Tells the world's stories with rigor and craft" },
+    { name: "Public Relations Director", why: "Shapes how organizations communicate publicly" },
+    { name: "Diplomat / Foreign Service Officer", why: "Represents nations and bridges cultures" },
+    { name: "Marketing Director", why: "Connects products with the people who'll love them" },
+    { name: "Podcast / Talk Show Host", why: "Hosts the conversations that matter" },
+    { name: "Translator / Interpreter", why: "Bridges languages and cultures" },
+    { name: "Community Organizer", why: "Brings people together around shared causes" },
+    { name: "Brand Strategist", why: "Builds how companies connect with their audiences" }
+  ]
+};
+
+/* ============================================================
+   INDUSTRIES — by dimension
+   ============================================================ */
+const INDUSTRIES = {
+  CREATE: ["Design & Creative Agencies", "Film & Entertainment", "Publishing & Media", "Architecture & Interiors", "Gaming & Animation", "Fashion & Apparel"],
+  ANALYZE: ["Technology & Software", "Finance & Investment", "Data & Analytics", "Insurance & Actuarial", "Cryptography & Security", "Scientific Computing"],
+  HELP: ["Healthcare & Medicine", "Education", "Mental Health & Therapy", "Nonprofit & Social Impact", "Veterinary Care", "Public Health"],
+  LEAD: ["Entrepreneurship & Startups", "Corporate Leadership", "Politics & Public Service", "Law & Legal", "Sports Management", "Investment & Banking"],
+  BUILD: ["Engineering & Manufacturing", "Construction & Architecture", "Culinary Arts", "Skilled Trades", "Robotics & Hardware", "Agriculture"],
+  ORGANIZE: ["Operations & Supply Chain", "Accounting & Finance", "Project Management", "Logistics", "Civil Service", "Information Management"],
+  EXPLORE: ["Scientific Research", "Academia", "Journalism & Investigation", "Museums & Cultural Heritage", "Field Sciences", "Think Tanks & Policy"],
+  CONNECT: ["Media & Communications", "Marketing & Advertising", "Public Relations", "International Relations", "Hospitality", "Community Development"]
+};
+
+/* ============================================================
+   PATH FORWARD — actionable next steps by archetype dimension
+   Tiered for kid vs adult
+   ============================================================ */
+const PATHS_BY_DIM = {
+  CREATE: {
+    kid: [
+      "Start a creative project this month — a comic, a song, a short video — and finish it from start to end.",
+      "Find ONE creative person whose work you love and study how they got started.",
+      "Take an art, design, music, or theater class — even online ones count.",
+      "Show your work to people. Don't keep it hidden in your room."
+    ],
+    teen: [
+      "Build a portfolio. Even three completed projects beats a hundred unfinished ones.",
+      "Pick a creative discipline you want to go deep in and start studying it seriously.",
+      "Find your community — online or in person — of other creative people at your level.",
+      "Start sharing your work publicly. Feedback is how you grow."
+    ],
+    adult: [
+      "Audit your week — how many hours actually go to creative work? Protect that time.",
+      "Identify one craft you want to deepen and commit to a 90-day practice plan.",
+      "Build or refresh a public portfolio. Your work should live somewhere people can find it.",
+      "Find a creative community — peers, not just consumers — who push your standards."
+    ]
+  },
+  ANALYZE: {
+    kid: [
+      "Pick up logic puzzles, chess, or math challenges. Make them part of your week.",
+      "Try learning to code — there are free sites made for kids.",
+      "Read about a scientist, mathematician, or thinker you find fascinating.",
+      "Enter a science fair, math olympiad, or coding competition this year."
+    ],
+    teen: [
+      "Take the most rigorous math or science classes you can handle.",
+      "Learn to code — Python is a great start. Build something real with it.",
+      "Find a research project or competition (science fair, math olympiad, hackathon).",
+      "Start reading papers or technical blogs in a field that interests you."
+    ],
+    adult: [
+      "Pick one hard analytical skill (statistics, programming, data analysis) and go deep for 90 days.",
+      "Find a problem in your work you can analyze rigorously and write up your findings.",
+      "Join a community of practitioners — read what they read, debate what they debate.",
+      "Take on a project that forces you to think harder than you currently do."
+    ]
+  },
+  HELP: {
+    kid: [
+      "Volunteer somewhere — animal shelter, community kitchen, helping younger kids.",
+      "Notice who in your life needs support and quietly show up for them.",
+      "Read about people who dedicated their lives to helping others.",
+      "Talk to adults who do helping work and ask about their path."
+    ],
+    teen: [
+      "Volunteer or work somewhere that puts you face-to-face with people you can help.",
+      "Shadow someone in healthcare, teaching, counseling, or social work.",
+      "Take a course in psychology, sociology, or human development.",
+      "Practice the harder skill: listening without trying to fix."
+    ],
+    adult: [
+      "Find one structured way to serve outside your job — mentoring, volunteering, board work.",
+      "Identify the helping path that fits you (healthcare, education, counseling, nonprofit, social work) and talk to people doing it.",
+      "If you're already in helping work, invest in your own emotional sustainability — burnout is real.",
+      "Get formal training in something — therapy, coaching, medicine, education — that multiplies your impact."
+    ]
+  },
+  LEAD: {
+    kid: [
+      "Volunteer to lead something small — a club, a project, a team.",
+      "Start something. A club, a small business, a campaign. Anything.",
+      "Read biographies of leaders you admire — not for the success, for the process.",
+      "Practice the hardest leadership skill: making decisions when you're not sure."
+    ],
+    teen: [
+      "Take on real leadership — president of a club, captain of a team, founder of an initiative.",
+      "Start something of your own this year. A club, business, or campaign.",
+      "Read serious books on leadership and management.",
+      "Find a mentor who leads at the level you aspire to."
+    ],
+    adult: [
+      "Identify the leadership role that's just beyond your current reach and take steps toward it.",
+      "If you don't currently lead — start. Volunteer to run a project, a team, an initiative.",
+      "Invest in leadership development: a course, a coach, a peer group of other leaders.",
+      "Build your judgment — the highest-leverage leadership skill — by making more decisions and tracking them."
+    ]
+  },
+  BUILD: {
+    kid: [
+      "Get your hands on tools — Lego Technic, woodworking, electronics kits, robotics.",
+      "Take something apart (with permission) and put it back together.",
+      "Build something this month — physical, real, finished.",
+      "Find a maker space or shop class and spend time there."
+    ],
+    teen: [
+      "Apprentice or shadow someone skilled — a carpenter, mechanic, chef, surgeon, engineer.",
+      "Take on a real build project — something complex enough to teach you something.",
+      "Learn the fundamentals: tools, materials, technique, safety.",
+      "Find a maker space, fab lab, or workshop and spend serious time there."
+    ],
+    adult: [
+      "Pick a craft and commit to a year of deliberate practice.",
+      "Find a master in your craft and study how they work.",
+      "Build something significant this quarter — finished, not started.",
+      "If your current work isn't hands-on enough, find ways to bring craft back in — at work or outside it."
+    ]
+  },
+  ORGANIZE: {
+    kid: [
+      "Plan something — a party, a trip, a project — from start to finish.",
+      "Take responsibility for one system at home or school. Make it work better.",
+      "Try keeping a calendar, planner, or task list. Find what works for you.",
+      "Help organize a club or event — operations is leadership."
+    ],
+    teen: [
+      "Take on a role that requires real planning — event coordinator, team manager, treasurer.",
+      "Learn a serious productivity or project management system.",
+      "Volunteer to handle the operations of a club or initiative — that's where you'll thrive.",
+      "Read about how operations works at well-run organizations."
+    ],
+    adult: [
+      "Identify one system at work that's broken and own redesigning it.",
+      "Learn frameworks: project management, operations, process design.",
+      "Take on a role with real operational responsibility.",
+      "Build a personal system for your own life that you'd be proud to teach someone."
+    ]
+  },
+  EXPLORE: {
+    kid: [
+      "Pick a topic that fascinates you and read everything you can about it.",
+      "Visit museums, science centers, libraries — let curiosity lead.",
+      "Start a notebook of questions. Then start answering them.",
+      "Find a documentary or podcast on something you know nothing about."
+    ],
+    teen: [
+      "Pick a field you want to explore deeply and start a serious self-study.",
+      "Find a research opportunity — at school, at a university, online.",
+      "Read primary sources, not just summaries. Get used to dense material.",
+      "Identify mentors and experts in your field of interest. Reach out."
+    ],
+    adult: [
+      "Define one big question you want to spend years exploring.",
+      "Build a research practice — reading, note-taking, synthesis.",
+      "Find your intellectual community — people pushing the same frontier.",
+      "Consider whether your current work feeds your curiosity. If not, change something."
+    ]
+  },
+  CONNECT: {
+    kid: [
+      "Practice telling stories — at dinner, in writing, in front of small groups.",
+      "Try acting, debate, public speaking, or starting a podcast or vlog.",
+      "Read widely — fiction especially — to build your sense of how stories work.",
+      "Notice the people who tell stories well. Study them."
+    ],
+    teen: [
+      "Get serious about your communication skills — writing, speaking, storytelling.",
+      "Start something public — a blog, podcast, newsletter, channel — and stay consistent.",
+      "Take debate, theater, journalism, or writing seriously.",
+      "Build relationships intentionally — not for networking, but for genuine connection."
+    ],
+    adult: [
+      "Audit your communication — writing, speaking, presence — and pick one to deepen.",
+      "Start or contribute to a public body of work — newsletter, podcast, talks, articles.",
+      "Build your relational discipline — the people in your life are your real career capital.",
+      "Find roles where communication is a core lever, not a side skill."
+    ]
+  }
+};
+
+/* ============================================================
+   APPLICATION LOGIC
+   ============================================================ */
+
+let state = {
+  name: "",
+  email: "",
+  age: 0,
+  ageTier: 1,
+  currentQ: 0,
+  answers: {}, // questionId -> {dim, weight}
+  scores: {},
+  startTime: null
+};
+
+// Initialize scores
+function initScores() {
+  state.scores = {};
+  Object.keys(DIMENSIONS).forEach(d => state.scores[d] = 0);
+}
+
+// Determine age tier
+function getAgeTier(age) {
+  if (age <= 14) return 0;
+  if (age <= 19) return 1;
+  return 2;
+}
+
+// ============ SUPABASE CLIENT ============
+let supabaseClient = null;
+const config = window.INNER_COMPASS_CONFIG;
+if (config.SAVE_RESULTS_ENABLED &&
+    config.SUPABASE_URL !== "YOUR_SUPABASE_URL_HERE" &&
+    typeof supabase !== 'undefined') {
+  try {
+    supabaseClient = supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+    console.log('Supabase initialized');
+  } catch (e) {
+    console.warn('Supabase init failed:', e);
+  }
+}
+
+// ============ LANDING SCREEN ============
+const nameInput = document.getElementById('user-name');
+const ageInput = document.getElementById('user-age');
+const emailInput = document.getElementById('user-email');
+const startBtn = document.getElementById('start-btn');
+const ageError = document.getElementById('age-error');
+
+function checkStartReady() {
+  const name = nameInput.value.trim();
+  const age = parseInt(ageInput.value);
+  const validAge = age >= 10 && age <= 100;
+  startBtn.disabled = !(name.length >= 1 && validAge);
+
+  if (ageInput.value && !validAge) {
+    ageError.style.display = 'block';
+  } else {
+    ageError.style.display = 'none';
+  }
+}
+
+nameInput.addEventListener('input', checkStartReady);
+ageInput.addEventListener('input', checkStartReady);
+
+startBtn.addEventListener('click', () => {
+  state.name = nameInput.value.trim();
+  state.email = emailInput.value.trim();
+  state.age = parseInt(ageInput.value);
+  state.ageTier = getAgeTier(state.age);
+  state.currentQ = 0;
+  state.answers = {};
+  state.startTime = Date.now();
+  initScores();
+
+  // Track event
+  window.gtag('event', 'test_started', {
+    age_tier: state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult',
+    has_email: state.email.length > 0
+  });
+
+  showScreen('test');
+  renderQuestion();
+});
+
+// ============ NAVIGATION ============
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ QUESTION RENDERING ============
+const questionMeta = document.getElementById('question-meta');
+const questionText = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+const progressFill = document.getElementById('progress-fill');
+const progressLabel = document.getElementById('progress-label');
+const progressSection = document.getElementById('progress-section');
+const prevBtn = document.getElementById('prev-btn');
+const skipBtn = document.getElementById('skip-btn');
+
+function renderQuestion() {
+  const q = QUESTIONS[state.currentQ];
+  const tier = state.ageTier;
+
+  // Update meta
+  const num = String(state.currentQ + 1).padStart(2, '0');
+  questionMeta.textContent = `— Question ${num} —`;
+  questionText.textContent = q.tiers[tier];
+
+  // Update progress
+  const pct = ((state.currentQ) / QUESTIONS.length) * 100;
+  progressFill.style.width = pct + '%';
+  progressLabel.textContent = `Question ${state.currentQ + 1} of ${QUESTIONS.length}`;
+  progressSection.textContent = `Section · ${q.section}`;
+
+  // Render options (shuffle for fairness)
+  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  optionsContainer.innerHTML = '';
+  const markers = ['A', 'B', 'C', 'D', 'E'];
+  shuffled.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    const previousAnswer = state.answers[q.id];
+    if (previousAnswer && previousAnswer.dim === opt.dim && previousAnswer.weight === opt.weight) {
+      btn.classList.add('selected');
+    }
+    btn.innerHTML = `
+      <span>${opt.tiers[tier]}</span>
+      <span class="option-marker">${markers[idx]}</span>
+    `;
+    btn.addEventListener('click', () => selectOption(q, opt));
+    optionsContainer.appendChild(btn);
+  });
+
+  // Update buttons
+  prevBtn.disabled = state.currentQ === 0;
+  skipBtn.textContent = state.currentQ === QUESTIONS.length - 1 ? 'Skip & finish →' : 'Skip this question';
+}
+
+function selectOption(question, option) {
+  // If this question already has an answer, subtract it
+  const previous = state.answers[question.id];
+  if (previous) {
+    state.scores[previous.dim] -= previous.weight;
+  }
+
+  // Add new answer
+  state.answers[question.id] = { dim: option.dim, weight: option.weight };
+  state.scores[option.dim] += option.weight;
+
+  // Visual feedback
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // Auto-advance after short delay
+  setTimeout(() => {
+    if (state.currentQ < QUESTIONS.length - 1) {
+      state.currentQ++;
+      renderQuestion();
+    } else {
+      finishTest();
+    }
+  }, 350);
+}
+
+prevBtn.addEventListener('click', () => {
+  if (state.currentQ > 0) {
+    state.currentQ--;
+    renderQuestion();
+  }
+});
+
+skipBtn.addEventListener('click', () => {
+  if (state.currentQ < QUESTIONS.length - 1) {
+    state.currentQ++;
+    renderQuestion();
+  } else {
+    finishTest();
+  }
+});
+
+// ============ RESULTS ============
+async function saveResultsToDatabase(top, second, archetype, sortedScores) {
+  if (!supabaseClient) return;
+
+  try {
+    const durationSeconds = state.startTime
+      ? Math.round((Date.now() - state.startTime) / 1000)
+      : null;
+
+    const { data, error } = await supabaseClient
+      .from('test_results')
+      .insert([{
+        name: state.name,
+        email: state.email || null,
+        age: state.age,
+        age_tier: state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult',
+        primary_dimension: top,
+        secondary_dimension: second,
+        archetype_name: archetype.name,
+        scores: Object.fromEntries(sortedScores),
+        duration_seconds: durationSeconds,
+        completed_at: new Date().toISOString()
+      }]);
+
+    if (error) {
+      console.warn('Failed to save results:', error.message);
+    } else {
+      console.log('Results saved successfully');
+    }
+  } catch (e) {
+    console.warn('Save error:', e);
+  }
+}
+
+function finishTest() {
+  // Sort dimensions by score
+  const sorted = Object.entries(state.scores)
+    .sort((a, b) => b[1] - a[1]);
+
+  const top = sorted[0][0];
+  const second = sorted[1][0];
+  const max = sorted[0][1];
+
+  // Compute percentages (relative to max for visualization)
+  const totalPossible = QUESTIONS.length * 3; // theoretical max if all answered with weight 3 to one dim
+
+  // Render archetype
+  const key1 = `${top}+${second}`;
+  const key2 = `${second}+${top}`;
+  const archetype = ARCHETYPES[key1] || ARCHETYPES[key2] || FALLBACK_ARCHETYPE;
+  document.getElementById('archetype-name').textContent = archetype.name;
+  document.getElementById('archetype-desc').textContent = archetype.desc;
+
+  // Track completion
+  window.gtag('event', 'test_completed', {
+    archetype: archetype.name,
+    primary_dimension: top,
+    secondary_dimension: second,
+    age_tier: state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult'
+  });
+
+  // Save to database (async, non-blocking)
+  saveResultsToDatabase(top, second, archetype, sorted);
+
+  // Render header
+  document.getElementById('results-username').textContent = state.name;
+  document.getElementById('results-tag').textContent =
+    state.ageTier === 0
+      ? "Here's what we discovered about you — your strengths, the careers that might fit, and what to do next."
+      : state.ageTier === 1
+        ? "Here's what we discovered about you — your strengths, careers worth considering, and how to keep growing."
+        : "Here's what we discovered about you — your strengths, the work you're built for, and where to take it from here.";
+
+  // Render strengths (top 5)
+  const strengthsGrid = document.getElementById('strengths-grid');
+  strengthsGrid.innerHTML = '';
+  sorted.slice(0, 5).forEach(([dim, score], idx) => {
+    const pct = Math.min(100, Math.round((score / max) * 100));
+    const row = document.createElement('div');
+    row.className = 'strength-row';
+    row.innerHTML = `
+      <div class="strength-rank">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="strength-info">
+        <h4>${DIMENSIONS[dim].name}</h4>
+        <p>${DIMENSIONS[dim].desc}</p>
+      </div>
+      <div class="strength-score">
+        <div class="strength-bar"><div class="strength-bar-fill" data-pct="${pct}"></div></div>
+        <div class="strength-pct">${pct}%</div>
+      </div>
+    `;
+    strengthsGrid.appendChild(row);
+  });
+
+  // Animate bars after a tick
+  setTimeout(() => {
+    document.querySelectorAll('.strength-bar-fill').forEach(b => {
+      b.style.width = b.dataset.pct + '%';
+    });
+  }, 100);
+
+  // Render careers (top 6 from primary dim, plus 2 from secondary)
+  const careerGrid = document.getElementById('career-grid');
+  careerGrid.innerHTML = '';
+  const primaryCareers = [...CAREERS[top]].sort(() => Math.random() - 0.5).slice(0, 6);
+  const secondaryCareers = [...CAREERS[second]].sort(() => Math.random() - 0.5).slice(0, 2);
+  const allCareers = [...primaryCareers, ...secondaryCareers];
+  allCareers.forEach((career, idx) => {
+    const card = document.createElement('div');
+    card.className = 'career-card';
+    const tag = idx < 6 ? `Match · ${DIMENSIONS[top].name}` : `Match · ${DIMENSIONS[second].name}`;
+    card.innerHTML = `
+      <div class="career-tag">${tag}</div>
+      <h4>${career.name}</h4>
+      <p class="career-why">${career.why}</p>
+    `;
+    careerGrid.appendChild(card);
+  });
+
+  // Industries (combine top 2 dim industries)
+  const industryTags = document.getElementById('industry-tags');
+  industryTags.innerHTML = '';
+  const allIndustries = [...new Set([...INDUSTRIES[top], ...INDUSTRIES[second]])];
+  allIndustries.forEach(ind => {
+    const tag = document.createElement('div');
+    tag.className = 'industry-tag';
+    tag.textContent = ind;
+    industryTags.appendChild(tag);
+  });
+
+  // Path forward
+  const pathList = document.getElementById('path-list');
+  pathList.innerHTML = '';
+  const pathTier = state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult';
+  const paths = PATHS_BY_DIM[top][pathTier];
+  paths.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p;
+    pathList.appendChild(li);
+  });
+
+  // Update progress fully
+  progressFill.style.width = '100%';
+
+  showScreen('results');
+}
+
+// Restart
+document.getElementById('restart-btn').addEventListener('click', () => {
+  state = { name: "", email: "", age: 0, ageTier: 1, currentQ: 0, answers: {}, scores: {}, startTime: null };
+  nameInput.value = '';
+  ageInput.value = '';
+  emailInput.value = '';
+  checkStartReady();
+  showScreen('landing');
+});
+
+// Print
+document.getElementById('print-btn').addEventListener('click', () => {
+  window.print();
+});
+
+// Initialize
+checkStartReady();
+</script>
+</body>
+</html>
