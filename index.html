@@ -56,6 +56,35 @@
 <!-- Supabase JS library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
+<!-- jsPDF for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- EmailJS for sending emails from browser -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // EmailJS config — replace with your real values from emailjs.com
+  window.EMAILJS_CONFIG = {
+    PUBLIC_KEY: "L3DtsMzOelmmX8YhU",
+    SERVICE_ID: "service_8ezd26e",
+    TEMPLATE_ID: "template_34bol3s",
+    EMAIL_ENABLED: true  // set to true after configuring above
+  };
+
+  // Initialize EmailJS when ready
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.EMAILJS_CONFIG.EMAIL_ENABLED &&
+        window.EMAILJS_CONFIG.PUBLIC_KEY !== "YOUR_EMAILJS_PUBLIC_KEY" &&
+        typeof emailjs !== 'undefined') {
+      try {
+        emailjs.init({ publicKey: window.EMAILJS_CONFIG.PUBLIC_KEY });
+        console.log('EmailJS initialized');
+      } catch (e) {
+        console.warn('EmailJS init failed:', e);
+      }
+    }
+  });
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:opsz,wght@9..40,300..700&display=swap" rel="stylesheet">
@@ -1296,8 +1325,9 @@
     </div>
 
     <div class="results-actions">
-      <button class="btn" id="restart-btn">Take the test again <span class="btn-arrow">↻</span></button>
-      <button class="btn-secondary" id="print-btn">Save / print report</button>
+      <button class="btn" id="pdf-btn">📄 Download PDF Report <span class="btn-arrow">↓</span></button>
+      <button class="btn-secondary" id="restart-btn">Take the test again ↻</button>
+      <button class="btn-secondary" id="print-btn">Print this page</button>
     </div>
   </div>
 </section>
@@ -2830,6 +2860,9 @@ function finishTest() {
   // Save to database (async, non-blocking)
   saveResultsToDatabase(top, second, archetype, sorted);
 
+  // Send email with results (async, non-blocking)
+  sendResultEmail(archetype, top, second, sorted);
+
   // Render header
   document.getElementById('results-username').textContent = state.name;
   document.getElementById('results-tag').textContent =
@@ -3263,6 +3296,411 @@ document.getElementById('restart-btn').addEventListener('click', () => {
 document.getElementById('print-btn').addEventListener('click', () => {
   window.print();
 });
+
+// ============ PDF REPORT GENERATION ============
+document.getElementById('pdf-btn').addEventListener('click', () => {
+  generatePDFReport();
+});
+
+function generatePDFReport() {
+  const btn = document.getElementById('pdf-btn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Generating PDF...';
+  btn.disabled = true;
+
+  try {
+    if (typeof window.jspdf === 'undefined') {
+      alert('PDF library not loaded. Please refresh and try again.');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+    // Color palette
+    const INK = [26, 24, 21];
+    const ACCENT = [196, 69, 45];
+    const PAPER_WARM = [237, 228, 211];
+    const MUTED = [120, 110, 95];
+
+    // Calculate scores and archetype
+    const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+    const top = sorted[0][0];
+    const second = sorted[1][0];
+    const max = sorted[0][1] || 1;
+    const archetype = ARCHETYPES[`${top}+${second}`] || ARCHETYPES[`${second}+${top}`] || FALLBACK_ARCHETYPE;
+
+    let pageNum = 1;
+
+    // ============ PAGE 1 — COVER ============
+    // Background accent
+    pdf.setFillColor(...ACCENT);
+    pdf.rect(0, 0, 210, 8, 'F');
+
+    // Logo / Brand
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('— INNER COMPASS —', 20, 25);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(...MUTED);
+    pdf.text('A Self-Discovery Instrument', 20, 31);
+
+    // Personalized greeting
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(14);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Personal Report for`, 20, 65);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(28);
+    pdf.setTextColor(...INK);
+    pdf.text(state.name, 20, 78);
+
+    // Date
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...MUTED);
+    const reportDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    pdf.text(`Generated on ${reportDate}`, 20, 87);
+
+    // Divider
+    pdf.setDrawColor(...INK);
+    pdf.setLineWidth(0.3);
+    pdf.line(20, 100, 190, 100);
+
+    // Archetype block
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('YOUR ARCHETYPE', 20, 115);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(36);
+    pdf.setTextColor(...INK);
+    // Wrap archetype name if too long
+    const archName = archetype.name;
+    if (archName.length > 18) {
+      const words = archName.split(' ');
+      const mid = Math.ceil(words.length / 2);
+      pdf.text(words.slice(0, mid).join(' '), 20, 132);
+      pdf.text(words.slice(mid).join(' '), 20, 148);
+    } else {
+      pdf.text(archName, 20, 138);
+    }
+
+    // Description
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...INK);
+    const descLines = pdf.splitTextToSize(archetype.desc, 170);
+    pdf.text(descLines, 20, archName.length > 18 ? 162 : 158);
+
+    // Quick stats box
+    pdf.setFillColor(...PAPER_WARM);
+    pdf.rect(20, 215, 170, 50, 'F');
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('AT A GLANCE', 28, 225);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...INK);
+    pdf.text(`Primary Strength:`, 28, 235);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(DIMENSIONS[top].name, 75, 235);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Secondary Strength:`, 28, 244);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(DIMENSIONS[second].name, 75, 244);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Age Group:`, 28, 253);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(state.ageTier === 0 ? 'Youth (10-14)' : state.ageTier === 1 ? 'Teen (15-19)' : 'Adult (20+)', 75, 253);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Total Questions Answered:`, 28, 262);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`${Object.keys(state.answers).length} of ${QUESTIONS.length}`, 90, 262);
+
+    // Footer
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Page ${pageNum} · Inner Compass Report for ${state.name}`, 105, 287, { align: 'center' });
+    pageNum++;
+
+    // ============ PAGE 2 — STRENGTHS BREAKDOWN ============
+    pdf.addPage();
+
+    pdf.setFillColor(...ACCENT);
+    pdf.rect(0, 0, 210, 8, 'F');
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('— SECTION I —', 20, 25);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(24);
+    pdf.setTextColor(...INK);
+    pdf.text('Your Strength Profile', 20, 38);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...MUTED);
+    pdf.text('Your scores across all 10 dimensions of strength, ranked from highest to lowest.', 20, 47);
+
+    // All strengths with bars
+    let yPos = 60;
+    sorted.forEach(([dim, score], idx) => {
+      const pct = Math.round((score / max) * 100);
+
+      // Rank
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(...ACCENT);
+      pdf.text(String(idx + 1).padStart(2, '0'), 20, yPos);
+
+      // Dimension name
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(...INK);
+      pdf.text(DIMENSIONS[dim].name, 32, yPos);
+
+      // Percentage
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(...MUTED);
+      pdf.text(`${pct}%`, 180, yPos, { align: 'right' });
+
+      // Description
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(...MUTED);
+      pdf.text(DIMENSIONS[dim].desc, 32, yPos + 5);
+
+      // Bar background
+      pdf.setFillColor(220, 215, 205);
+      pdf.rect(32, yPos + 8, 148, 2, 'F');
+
+      // Bar fill
+      pdf.setFillColor(...ACCENT);
+      pdf.rect(32, yPos + 8, 148 * (pct / 100), 2, 'F');
+
+      yPos += 21;
+    });
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Page ${pageNum} · Inner Compass Report for ${state.name}`, 105, 287, { align: 'center' });
+    pageNum++;
+
+    // ============ PAGE 3 — CAREERS & INDUSTRIES ============
+    pdf.addPage();
+
+    pdf.setFillColor(...ACCENT);
+    pdf.rect(0, 0, 210, 8, 'F');
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('— SECTION II —', 20, 25);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(24);
+    pdf.setTextColor(...INK);
+    pdf.text('Careers Worth Exploring', 20, 38);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Based on your top strengths in ${DIMENSIONS[top].name} and ${DIMENSIONS[second].name}.`, 20, 47);
+
+    // Careers list (top 6 from primary, 2 from secondary)
+    const primaryCareers = (CAREERS[top] || []).slice(0, 6);
+    const secondaryCareers = (CAREERS[second] || []).slice(0, 2);
+    const allCareers = [...primaryCareers, ...secondaryCareers];
+
+    yPos = 60;
+    allCareers.forEach((career, idx) => {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.setTextColor(...INK);
+      pdf.text(`${String(idx + 1).padStart(2, '0')}.  ${career.name}`, 20, yPos);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(...MUTED);
+      const whyLines = pdf.splitTextToSize(career.why, 165);
+      pdf.text(whyLines, 28, yPos + 5);
+
+      yPos += 5 + (whyLines.length * 4) + 5;
+    });
+
+    // Industries section
+    yPos += 5;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('Industries That Fit You', 20, yPos);
+    yPos += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...INK);
+    const allIndustries = [...new Set([...(INDUSTRIES[top] || []), ...(INDUSTRIES[second] || [])])];
+    const indText = allIndustries.join('  ·  ');
+    const indLines = pdf.splitTextToSize(indText, 170);
+    pdf.text(indLines, 20, yPos);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Page ${pageNum} · Inner Compass Report for ${state.name}`, 105, 287, { align: 'center' });
+    pageNum++;
+
+    // ============ PAGE 4 — PATH FORWARD ============
+    pdf.addPage();
+
+    pdf.setFillColor(...ACCENT);
+    pdf.rect(0, 0, 210, 8, 'F');
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...ACCENT);
+    pdf.text('— SECTION III —', 20, 25);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(24);
+    pdf.setTextColor(...INK);
+    pdf.text('Your Path Forward', 20, 38);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...MUTED);
+    pdf.text('Concrete steps you can take this month to grow into your strengths.', 20, 47);
+
+    const pathTier = state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult';
+    const paths = PATHS_BY_DIM[top] && PATHS_BY_DIM[top][pathTier] ? PATHS_BY_DIM[top][pathTier] : [];
+
+    yPos = 65;
+    paths.forEach((p, idx) => {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.setTextColor(...ACCENT);
+      pdf.text(String(idx + 1).padStart(2, '0'), 20, yPos);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.setTextColor(...INK);
+      const pLines = pdf.splitTextToSize(p, 160);
+      pdf.text(pLines, 32, yPos);
+      yPos += (pLines.length * 5) + 12;
+    });
+
+    // Closing note
+    yPos = Math.max(yPos + 10, 230);
+    pdf.setDrawColor(...INK);
+    pdf.setLineWidth(0.3);
+    pdf.line(20, yPos, 190, yPos);
+    yPos += 10;
+
+    pdf.setFont('helvetica', 'italic');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...INK);
+    pdf.text('A Note from Inner Compass', 20, yPos);
+    yPos += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...MUTED);
+    const note = "Your results are guidance, not destiny. People grow, change, and surprise themselves. Use this report as a starting point for conversations — with yourself, with mentors, with people who know you. The most important thing you can do is take one small step toward what genuinely interests you.";
+    const noteLines = pdf.splitTextToSize(note, 170);
+    pdf.text(noteLines, 20, yPos);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(...MUTED);
+    pdf.text(`Page ${pageNum} · Inner Compass Report for ${state.name}`, 105, 287, { align: 'center' });
+    pdf.text('innercompass.app · A self-discovery instrument', 105, 292, { align: 'center' });
+
+    // Save
+    const filename = `Inner-Compass-Report-${state.name.replace(/\s+/g, '-')}.pdf`;
+    pdf.save(filename);
+
+    // Track event
+    window.gtag('event', 'pdf_downloaded', { archetype: archetype.name });
+
+    // Reset button
+    btn.innerHTML = '✓ Downloaded!';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }, 2000);
+
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    alert('Sorry, PDF generation failed. Please try again.');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+// ============ EMAIL SENDING ============
+async function sendResultEmail(archetype, top, second, sortedScores) {
+  const config = window.EMAILJS_CONFIG;
+  if (!config.EMAIL_ENABLED ||
+      config.PUBLIC_KEY === "YOUR_EMAILJS_PUBLIC_KEY" ||
+      typeof emailjs === 'undefined') {
+    return;
+  }
+  if (!state.email) return;
+
+  try {
+    // Build top 5 strengths text
+    const top5 = sortedScores.slice(0, 5).map((s, i) =>
+      `${i + 1}. ${DIMENSIONS[s[0]].name}`
+    ).join('\n');
+
+    // Build top 5 careers text
+    const careers = (CAREERS[top] || []).slice(0, 5).map((c, i) =>
+      `${i + 1}. ${c.name} — ${c.why}`
+    ).join('\n\n');
+
+    const templateParams = {
+      to_name: state.name,
+      to_email: state.email,
+      archetype_name: archetype.name,
+      archetype_description: archetype.desc,
+      primary_strength: DIMENSIONS[top].name,
+      secondary_strength: DIMENSIONS[second].name,
+      top_strengths: top5,
+      top_careers: careers,
+      report_date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      website_url: window.location.href.split('?')[0]
+    };
+
+    const response = await emailjs.send(
+      config.SERVICE_ID,
+      config.TEMPLATE_ID,
+      templateParams
+    );
+    console.log('Email sent successfully:', response.status);
+    window.gtag('event', 'email_sent', { archetype: archetype.name });
+  } catch (e) {
+    console.warn('Email send failed:', e);
+  }
+}
 
 // Initialize
 checkStartReady();
