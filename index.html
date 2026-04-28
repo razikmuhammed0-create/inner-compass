@@ -957,11 +957,45 @@
 
   .share-whatsapp:hover { background: #25D366; color: white; border-color: #25D366; }
   .share-twitter:hover { background: #000; color: white; border-color: #000; }
+  .share-download {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: var(--paper) !important;
+  }
+  .share-download:hover {
+    background: var(--paper) !important;
+    color: var(--accent) !important;
+  }
 
   .share-copied {
     background: var(--accent) !important;
     color: var(--paper) !important;
     border-color: var(--accent) !important;
+  }
+
+  .share-subheading {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-bottom: 24px;
+  }
+
+  .share-tip {
+    margin-top: 24px;
+    font-size: 13px;
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
+  .result-image-preview {
+    max-width: 400px;
+    margin: 0 auto 24px;
+    border: 1px solid rgba(245, 240, 230, 0.2);
+  }
+
+  .result-image-preview canvas {
+    width: 100%;
+    height: auto;
+    display: block;
   }
 
   /* ============ PARENT CONSENT ============ */
@@ -1118,25 +1152,30 @@
 
     <!-- Share buttons -->
     <div class="share-section">
-      <h3 class="share-heading">Share your archetype</h3>
+      <h3 class="share-heading">Share your result</h3>
+      <p class="share-subheading">Generate a beautiful result card to share with friends</p>
+      <div id="result-image-preview" class="result-image-preview" style="display:none;">
+        <canvas id="result-card-canvas" width="1080" height="1350"></canvas>
+      </div>
       <div class="share-buttons">
+        <button class="share-btn share-download" id="share-download">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Result Image
+        </button>
         <button class="share-btn share-whatsapp" id="share-whatsapp">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
           WhatsApp
         </button>
         <button class="share-btn share-copy" id="share-copy">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy Link
+          Copy Text
         </button>
         <button class="share-btn share-twitter" id="share-twitter">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           X / Twitter
         </button>
-        <button class="share-btn share-email" id="share-email-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Email
-        </button>
       </div>
+      <p class="share-tip">💡 <strong>Tip:</strong> Click "Download Result Image" first, then attach it when sharing on WhatsApp or Instagram!</p>
     </div>
 
     <div class="section-head">
@@ -2552,23 +2591,31 @@ function finishTest() {
   // Update progress fully
   progressFill.style.width = '100%';
 
-  // Draw radar chart
-  drawRadarChart(state.scores);
-
   // Setup share buttons
   setupShareButtons(archetype, top);
 
   showScreen('results');
+
+  // Draw radar chart AFTER screen is visible (otherwise canvas has no size)
+  setTimeout(() => {
+    drawRadarChart(state.scores);
+  }, 100);
 }
 
 // ============ RADAR CHART ============
 function drawRadarChart(scores) {
   const canvas = document.getElementById('radar-chart');
   if (!canvas) return;
+  const container = canvas.parentElement;
+  if (!container || container.offsetWidth === 0) {
+    // Container not visible yet, retry
+    setTimeout(() => drawRadarChart(scores), 200);
+    return;
+  }
   const ctx = canvas.getContext('2d');
 
   // Make canvas responsive
-  const containerWidth = canvas.parentElement.offsetWidth;
+  const containerWidth = container.offsetWidth;
   const size = Math.min(500, containerWidth - 40);
   canvas.width = size;
   canvas.height = size;
@@ -2660,22 +2707,87 @@ function drawRadarChart(scores) {
 
 // ============ SHARE BUTTONS ============
 function setupShareButtons(archetype, topDim) {
-  const url = window.location.href.split('?')[0]; // remove any params
+  const url = window.location.href.split('?')[0];
   const dimName = DIMENSIONS[topDim].name;
-  const shareText = `I just discovered my career archetype on Inner Compass — I'm ${archetype.name}! My top strength is ${dimName}. Take the test and find yours:`;
+  const shareText = `🎯 I just took the Inner Compass test!\n\n✨ My archetype: ${archetype.name}\n💪 My top strength: ${dimName}\n\n${archetype.desc}\n\nDiscover your archetype:\n${url}`;
+  const shortText = `I'm "${archetype.name}" 🎯 — discover YOUR archetype: ${url}`;
 
-  // WhatsApp
-  document.getElementById('share-whatsapp').onclick = () => {
-    const text = encodeURIComponent(`${shareText} ${url}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-    window.gtag('event', 'share', { method: 'whatsapp', archetype: archetype.name });
+  // Generate result card image immediately
+  generateResultCard(archetype, topDim, state.scores);
+
+  // Download Result Image
+  document.getElementById('share-download').onclick = (e) => {
+    const btn = e.currentTarget;
+    const canvas = document.getElementById('result-card-canvas');
+    if (!canvas) return;
+
+    canvas.toBlob((blob) => {
+      const link = document.createElement('a');
+      link.download = `inner-compass-${archetype.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+
+      const original = btn.innerHTML;
+      btn.innerHTML = '✓ Downloaded!';
+      btn.classList.add('share-copied');
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.classList.remove('share-copied');
+      }, 2000);
+
+      // Show preview
+      document.getElementById('result-image-preview').style.display = 'block';
+    }, 'image/png');
+
+    window.gtag('event', 'share', { method: 'download_image', archetype: archetype.name });
   };
 
-  // Copy link
+  // WhatsApp - try Web Share API first (mobile), fallback to text
+  document.getElementById('share-whatsapp').onclick = async () => {
+    const canvas = document.getElementById('result-card-canvas');
+
+    // Try native share with image (works on mobile)
+    if (navigator.share && navigator.canShare && canvas) {
+      try {
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], 'my-archetype.png', { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                title: `I'm ${archetype.name}!`,
+                text: shareText,
+                files: [file]
+              });
+              window.gtag('event', 'share', { method: 'whatsapp_native', archetype: archetype.name });
+              return;
+            } catch (err) {
+              if (err.name !== 'AbortError') {
+                openWhatsApp();
+              }
+            }
+          } else {
+            openWhatsApp();
+          }
+        }, 'image/png');
+      } catch (e) {
+        openWhatsApp();
+      }
+    } else {
+      openWhatsApp();
+    }
+
+    function openWhatsApp() {
+      const text = encodeURIComponent(shareText);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+      window.gtag('event', 'share', { method: 'whatsapp_link', archetype: archetype.name });
+    }
+  };
+
+  // Copy text (full result message)
   document.getElementById('share-copy').onclick = (e) => {
     const btn = e.currentTarget;
-    const fullText = `${shareText} ${url}`;
-    navigator.clipboard.writeText(fullText).then(() => {
+    navigator.clipboard.writeText(shareText).then(() => {
       const original = btn.innerHTML;
       btn.innerHTML = '✓ Copied!';
       btn.classList.add('share-copied');
@@ -2686,24 +2798,133 @@ function setupShareButtons(archetype, topDim) {
     }).catch(() => {
       alert('Could not copy. Please manually copy: ' + url);
     });
-    window.gtag('event', 'share', { method: 'copy_link', archetype: archetype.name });
+    window.gtag('event', 'share', { method: 'copy_text', archetype: archetype.name });
   };
 
   // Twitter/X
   document.getElementById('share-twitter').onclick = () => {
-    const text = encodeURIComponent(shareText);
-    const u = encodeURIComponent(url);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${u}`, '_blank');
+    const text = encodeURIComponent(shortText);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
     window.gtag('event', 'share', { method: 'twitter', archetype: archetype.name });
   };
+}
 
-  // Email
-  document.getElementById('share-email-btn').onclick = () => {
-    const subject = encodeURIComponent(`I'm ${archetype.name} — what about you?`);
-    const body = encodeURIComponent(`${shareText}\n\n${url}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-    window.gtag('event', 'share', { method: 'email', archetype: archetype.name });
-  };
+// ============ RESULT CARD IMAGE GENERATION ============
+function generateResultCard(archetype, topDim, scores) {
+  const canvas = document.getElementById('result-card-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Background
+  ctx.fillStyle = '#f5f0e6';
+  ctx.fillRect(0, 0, W, H);
+
+  // Decorative top circle
+  ctx.fillStyle = '#c4452d';
+  ctx.beginPath();
+  ctx.arc(W - 100, 100, 250, 0, Math.PI * 2);
+  ctx.globalAlpha = 0.15;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Decorative bottom circle outline
+  ctx.strokeStyle = 'rgba(26, 24, 21, 0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(150, H - 100, 300, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Header
+  ctx.fillStyle = '#c4452d';
+  ctx.font = '500 28px DM Sans, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('— INNER COMPASS —', 80, 100);
+
+  ctx.fillStyle = '#1a1815';
+  ctx.font = '300 24px DM Sans, sans-serif';
+  ctx.fillText('A Self-Discovery Instrument', 80, 140);
+
+  // User name
+  ctx.font = '500 36px DM Sans, sans-serif';
+  ctx.fillStyle = 'rgba(26, 24, 21, 0.6)';
+  ctx.fillText(state.name + "'s Result", 80, 240);
+
+  // Archetype label
+  ctx.fillStyle = '#c4452d';
+  ctx.font = '500 22px DM Sans, sans-serif';
+  ctx.fillText('YOUR ARCHETYPE', 80, 320);
+
+  // Archetype name (large, serif)
+  ctx.fillStyle = '#1a1815';
+  ctx.font = 'italic 500 90px Fraunces, serif';
+  // Wrap if long
+  const archName = archetype.name;
+  if (archName.length > 14) {
+    const words = archName.split(' ');
+    const mid = Math.ceil(words.length / 2);
+    ctx.fillText(words.slice(0, mid).join(' '), 80, 420);
+    ctx.fillText(words.slice(mid).join(' '), 80, 510);
+  } else {
+    ctx.fillText(archName, 80, 440);
+  }
+
+  // Description (wrapped)
+  ctx.fillStyle = 'rgba(26, 24, 21, 0.8)';
+  ctx.font = '400 26px DM Sans, sans-serif';
+  const desc = archetype.desc;
+  const maxWidth = W - 160;
+  const lineHeight = 38;
+  let y = archName.length > 14 ? 600 : 530;
+  const words = desc.split(' ');
+  let line = '';
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && line) {
+      ctx.fillText(line.trim(), 80, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+      if (y > 850) break; // Cap description
+    } else {
+      line = testLine;
+    }
+  }
+  if (y <= 850) ctx.fillText(line.trim(), 80, y);
+
+  // Strength bars section
+  ctx.fillStyle = '#c4452d';
+  ctx.font = '500 22px DM Sans, sans-serif';
+  ctx.fillText('TOP 5 STRENGTHS', 80, 920);
+
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const max = sorted[0][1] || 1;
+  let barY = 960;
+  sorted.forEach(([dim, score], idx) => {
+    const pct = Math.min(100, (score / max) * 100);
+
+    // Label
+    ctx.fillStyle = '#1a1815';
+    ctx.font = '500 24px DM Sans, sans-serif';
+    ctx.fillText(`${idx + 1}. ${DIMENSIONS[dim].name}`, 80, barY);
+
+    // Bar background
+    ctx.fillStyle = 'rgba(26, 24, 21, 0.1)';
+    ctx.fillRect(80, barY + 10, W - 160, 8);
+
+    // Bar fill
+    ctx.fillStyle = '#c4452d';
+    ctx.fillRect(80, barY + 10, (W - 160) * (pct / 100), 8);
+
+    barY += 60;
+  });
+
+  // Footer
+  ctx.fillStyle = 'rgba(26, 24, 21, 0.5)';
+  ctx.font = '500 20px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Take the test at razikmuhammed0-create.github.io/inner-compass', W / 2, H - 40);
 }
 
 // Restart
