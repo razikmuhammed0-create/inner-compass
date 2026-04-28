@@ -509,6 +509,91 @@
     border-color: var(--accent);
   }
 
+  /* Multi-select hint */
+  .multi-hint {
+    font-size: 13px;
+    padding: 12px 20px;
+    background: var(--paper-warm);
+    border: 1px dashed var(--line);
+    margin-bottom: 16px;
+    color: var(--ink);
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+  }
+
+  /* REST option styling - distinct visual */
+  .option.option-rest {
+    border-style: dashed;
+    border-color: var(--sage);
+    background: rgba(107, 126, 90, 0.05);
+  }
+
+  .option.option-rest:hover {
+    background: var(--sage);
+    color: var(--paper);
+    border-color: var(--sage);
+  }
+
+  .option.option-rest.selected {
+    background: var(--sage);
+    color: var(--paper);
+    border-color: var(--sage);
+  }
+
+  /* OTHER option styling - distinct */
+  .option.option-other {
+    border-style: dotted;
+    border-color: rgba(26, 24, 21, 0.4);
+    background: rgba(26, 24, 21, 0.03);
+    font-style: italic;
+  }
+
+  .option.option-other:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .option.option-other.selected {
+    background: var(--plum);
+    color: var(--paper);
+    border-color: var(--plum);
+  }
+
+  /* Continue button for multi-select */
+  .continue-wrap {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-continue {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 14px 32px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-continue:hover:not(:disabled) {
+    background: var(--ink);
+    transform: translateX(4px);
+  }
+
+  .btn-continue:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--ink);
+  }
+
   .nav-buttons {
     display: flex;
     justify-content: space-between;
@@ -1238,7 +1323,8 @@ const DIMENSIONS = {
   ORGANIZE:  { name: "Order & Structure",    desc: "Planning, organizing, and bringing systems to life" },
   EXPLORE:   { name: "Discovery & Inquiry",  desc: "Investigating, researching, asking deep questions" },
   CONNECT:   { name: "People & Communication", desc: "Connecting, storytelling, building relationships" },
-  REASONING: { name: "Reasoning Ability",    desc: "Logic, pattern recognition, and problem-solving power" }
+  REASONING: { name: "Reasoning Ability",    desc: "Logic, pattern recognition, and problem-solving power" },
+  REST:      { name: "Rest & Reflection",    desc: "Stillness, mindfulness, and finding strength in slowness" }
 };
 
 /* ============================================================
@@ -1261,7 +1347,9 @@ const QUESTIONS = [
       { tiers: ["Drawing, building Lego, or making something cool", "Sketching, designing, or creating something new", "A creative project — design, writing, music, art"], dim: "CREATE", weight: 3 },
       { tiers: ["Solving a tough puzzle or playing strategy games", "Working through a logic puzzle or strategy game", "Diving into a complex problem or analytical challenge"], dim: "ANALYZE", weight: 3 },
       { tiers: ["Hanging out with friends and helping them with stuff", "Spending time with friends, helping them out", "Catching up with people, supporting someone who needs it"], dim: "HELP", weight: 3 },
-      { tiers: ["Fixing a broken bike or building a fort", "Tinkering with something — fixing, building, making", "Hands-on work — building, repairing, gardening, cooking"], dim: "BUILD", weight: 3 }
+      { tiers: ["Fixing a broken bike or building a fort", "Tinkering with something — fixing, building, making", "Hands-on work — building, repairing, gardening, cooking"], dim: "BUILD", weight: 3 },
+      { tiers: ["Just relax — sleep in, watch shows, do nothing", "Take a real rest day — sleep in, recharge", "A pure rest day — recharge, nap, slow down"], dim: "REST", weight: 3 },
+      { tiers: ["Something else (not in this list)", "Something else not listed here", "Something else — none of these fit me"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1276,7 +1364,9 @@ const QUESTIONS = [
       { tiers: ["Singing, dancing, or doing magic tricks", "Music, dance, drama — something performed", "A performance — music, comedy, storytelling"], dim: "CREATE", weight: 3 },
       { tiers: ["Showing off a science experiment or invention", "Demonstrating a science project or invention", "Presenting an interesting idea or research finding"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Hosting and making everyone laugh", "MC'ing the event and keeping it fun", "Hosting — keeping the energy and crowd engaged"], dim: "LEAD", weight: 2 },
-      { tiers: ["Telling a really good story", "Performing spoken word or storytelling", "Storytelling, public speaking, or a written piece read aloud"], dim: "CONNECT", weight: 3 }
+      { tiers: ["Telling a really good story", "Performing spoken word or storytelling", "Storytelling, public speaking, or a written piece read aloud"], dim: "CONNECT", weight: 3 },
+      { tiers: ["I'd skip it and just watch from the audience", "I'd help backstage rather than perform", "I'd prefer to be in the audience, not on stage"], dim: "REST", weight: 3 },
+      { tiers: ["Something else I'm good at", "A different talent not listed", "A different skill not represented here"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1291,7 +1381,9 @@ const QUESTIONS = [
       { tiers: ["How things work — gadgets, animals, space", "Documentaries, science, how-things-work videos", "Deep dives — science, ideas, how the world works"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Stories about heroes and adventures", "Fiction — stories, novels, films with rich characters", "Literature, films, narrative writing"], dim: "CREATE", weight: 2 },
       { tiers: ["Tutorials on how to make or build things", "DIY tutorials, build videos, craft channels", "Practical guides — building, making, doing"], dim: "BUILD", weight: 3 },
-      { tiers: ["Stories about real people and their lives", "Biographies, interviews, real-people stories", "Profiles, interviews, human-interest journalism"], dim: "CONNECT", weight: 3 }
+      { tiers: ["Stories about real people and their lives", "Biographies, interviews, real-people stories", "Profiles, interviews, human-interest journalism"], dim: "CONNECT", weight: 3 },
+      { tiers: ["Calm, peaceful content — nature, ASMR, meditation", "Calming content — nature, mindfulness, slow vlogs", "Slow, contemplative content — nature, philosophy, mindfulness"], dim: "REST", weight: 3 },
+      { tiers: ["Something else I love watching", "A different genre not listed", "A genre not represented here"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1308,7 +1400,9 @@ const QUESTIONS = [
       { tiers: ["Just start clicking around and try stuff", "Dive in and figure it out by experimenting", "Jump in and learn by doing"], dim: "CREATE", weight: 2 },
       { tiers: ["Read all the rules so I can play it perfectly", "Read the instructions thoroughly first", "Study the documentation before touching anything"], dim: "ORGANIZE", weight: 3 },
       { tiers: ["Watch someone good play it first", "Watch a tutorial from someone who's mastered it", "Find an expert walkthrough or course"], dim: "EXPLORE", weight: 2 },
-      { tiers: ["Ask a friend to play with me and figure it out together", "Try it with a friend and learn together", "Bring in a colleague and explore it as a team"], dim: "CONNECT", weight: 2 }
+      { tiers: ["Ask a friend to play with me and figure it out together", "Try it with a friend and learn together", "Bring in a colleague and explore it as a team"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Maybe try it later when I feel like it", "Set it aside — I'll get to it eventually", "Park it for later — I'm not in a rush"], dim: "REST", weight: 3 },
+      { tiers: ["A different way not listed here", "A different approach not listed", "A different approach entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1323,7 +1417,9 @@ const QUESTIONS = [
       { tiers: ["YES! I love that stuff", "Excited — I love the challenge", "Energized — the harder, the better"], dim: "ANALYZE", weight: 3 },
       { tiers: ["Cool, but I'd rather do it with someone", "Fun, but better with company", "Interesting — but more rewarding as a shared effort"], dim: "CONNECT", weight: 2 },
       { tiers: ["I'd rather build something than solve a puzzle", "I'd rather make something with my hands", "I'd prefer to be building something tangible"], dim: "BUILD", weight: 2 },
-      { tiers: ["Sounds boring. Can I draw instead?", "Not my thing — I'd rather create something", "I'd rather pour that time into a creative project"], dim: "CREATE", weight: 2 }
+      { tiers: ["Sounds boring. Can I draw instead?", "Not my thing — I'd rather create something", "I'd rather pour that time into a creative project"], dim: "CREATE", weight: 2 },
+      { tiers: ["I'd rather just relax with music or a nap", "I'd rather chill — listen to music, rest", "I'd rather have a quiet, restful day instead"], dim: "REST", weight: 3 },
+      { tiers: ["I'd do something completely different", "I'd choose a different activity", "I'd prefer something else entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1338,7 +1434,9 @@ const QUESTIONS = [
       { tiers: ["Keep asking 'why?' until I get it", "Research and dig until I figure it out", "Investigate deeply until I genuinely understand"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Take it apart and look inside", "Try to break it down into pieces I can analyze", "Decompose it into parts and analyze each"], dim: "ANALYZE", weight: 3 },
       { tiers: ["Ask an adult or my teacher", "Ask someone who knows more than me", "Reach out to an expert or mentor"], dim: "CONNECT", weight: 2 },
-      { tiers: ["Try to solve it by helping someone else with it", "Help someone else with it — teaching helps me learn", "Teach it to someone — that's how I solidify it"], dim: "HELP", weight: 2 }
+      { tiers: ["Try to solve it by helping someone else with it", "Help someone else with it — teaching helps me learn", "Teach it to someone — that's how I solidify it"], dim: "HELP", weight: 2 },
+      { tiers: ["Let it sit — I'll get it eventually", "Let it sit and come back to it later", "Sit with the not-knowing — clarity comes in time"], dim: "REST", weight: 3 },
+      { tiers: ["A different approach", "A different way to figure it out", "A different approach not listed"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1355,7 +1453,9 @@ const QUESTIONS = [
       { tiers: ["Sit with them and listen to how they feel", "Listen — really listen — and let them feel heard", "Hold space, listen without trying to fix it"], dim: "HELP", weight: 3 },
       { tiers: ["Help them study so they do better next time", "Make a study plan with them for next time", "Help them set up a system to bounce back"], dim: "ORGANIZE", weight: 2 },
       { tiers: ["Tell them a funny story to cheer them up", "Tell stories or jokes to lift them up", "Use humor and storytelling to shift their mood"], dim: "CONNECT", weight: 2 },
-      { tiers: ["Make them something — like a card or treat", "Make them something thoughtful", "Cook for them, build them something, do something tangible"], dim: "BUILD", weight: 2 }
+      { tiers: ["Make them something — like a card or treat", "Make them something thoughtful", "Cook for them, build them something, do something tangible"], dim: "BUILD", weight: 2 },
+      { tiers: ["Give them space to rest and process alone", "Give them space and let them rest", "Give them space — sometimes solitude heals best"], dim: "REST", weight: 3 },
+      { tiers: ["Something else I'd do", "A different way to support them", "A different approach to supporting them"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1370,7 +1470,9 @@ const QUESTIONS = [
       { tiers: ["Make sure no kid goes hungry or sad", "Reduce hunger, poverty, or inequality", "Tackle systemic poverty, hunger, or social inequality"], dim: "HELP", weight: 3 },
       { tiers: ["Invent something that solves a big problem", "Invent something that solves a major issue", "Build technology that addresses a critical challenge"], dim: "BUILD", weight: 2 },
       { tiers: ["Discover the cure for a disease", "Discover a cure or scientific breakthrough", "Lead research that produces a major discovery"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Make people kinder to each other", "Bring people together and reduce conflict", "Improve how people communicate and connect"], dim: "CONNECT", weight: 2 }
+      { tiers: ["Make people kinder to each other", "Bring people together and reduce conflict", "Improve how people communicate and connect"], dim: "CONNECT", weight: 2 },
+      { tiers: ["Help people slow down and find peace", "Help people find calm, peace, and balance", "Bring more peace, mindfulness, and stillness to the world"], dim: "REST", weight: 3 },
+      { tiers: ["Something else important to me", "A different cause I care about", "A different cause that matters to me"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1385,7 +1487,9 @@ const QUESTIONS = [
       { tiers: ["Helping someone who really needed it", "Helping someone through a hard moment", "Making a real difference in someone's life"], dim: "HELP", weight: 3 },
       { tiers: ["Finishing something I made all by myself", "Completing a project I created from scratch", "Shipping a creative work I'm proud of"], dim: "CREATE", weight: 2 },
       { tiers: ["Winning a game or competition", "Winning a challenge or competition", "Achieving a goal I set against tough odds"], dim: "LEAD", weight: 2 },
-      { tiers: ["Figuring out something nobody else could", "Solving a problem others couldn't crack", "Cracking a hard problem nobody else could solve"], dim: "ANALYZE", weight: 3 }
+      { tiers: ["Figuring out something nobody else could", "Solving a problem others couldn't crack", "Cracking a hard problem nobody else could solve"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Having a long peaceful day with no pressure", "A long quiet day with no agenda", "A day of true rest with nothing to prove"], dim: "REST", weight: 3 },
+      { tiers: ["Something else makes me feel that way", "A different feeling of accomplishment", "A different sense of fulfillment"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1402,7 +1506,9 @@ const QUESTIONS = [
       { tiers: ["I take charge and divide the work", "I organize the team and set the plan", "I lead — set direction, divide work, drive momentum"], dim: "LEAD", weight: 3 },
       { tiers: ["I do the creative parts — designs and ideas", "I handle the creative side — visuals, ideas", "I take the creative work — design, ideation, presentation"], dim: "CREATE", weight: 2 },
       { tiers: ["I do the research and find the facts", "I research and gather all the information", "I dig into the analysis and bring back insights"], dim: "EXPLORE", weight: 2 },
-      { tiers: ["I make sure everyone is doing okay and helping", "I keep the team morale up and check in on everyone", "I attend to team dynamics — make sure everyone's heard"], dim: "HELP", weight: 2 }
+      { tiers: ["I make sure everyone is doing okay and helping", "I keep the team morale up and check in on everyone", "I attend to team dynamics — make sure everyone's heard"], dim: "HELP", weight: 2 },
+      { tiers: ["I'd rather do less and let others lead", "I'd take a quiet supporting role", "I'd take a low-key role — supporting, not leading"], dim: "REST", weight: 3 },
+      { tiers: ["A different role I'd play", "A different role not listed", "A different role not described here"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1417,7 +1523,9 @@ const QUESTIONS = [
       { tiers: ["Running my own business or company", "Running my own venture or company", "Leading my own organization or business"], dim: "LEAD", weight: 3 },
       { tiers: ["Working in a lab or studio creating things", "Working in a studio or lab building new things", "Working independently on craft, research, or creative output"], dim: "CREATE", weight: 2 },
       { tiers: ["Helping people every day in some way", "Doing work that improves people's lives", "Working in a role that directly serves others"], dim: "HELP", weight: 3 },
-      { tiers: ["Traveling and discovering new things", "Exploring new places, ideas, or fields", "Doing work that takes me into the unknown"], dim: "EXPLORE", weight: 2 }
+      { tiers: ["Traveling and discovering new things", "Exploring new places, ideas, or fields", "Doing work that takes me into the unknown"], dim: "EXPLORE", weight: 2 },
+      { tiers: ["Living simply with lots of free time", "Living a simple, balanced life with time to breathe", "A simple, intentional life with space and stillness"], dim: "REST", weight: 3 },
+      { tiers: ["Something else I dream of", "A different vision for my future", "A different vision of my future"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1432,7 +1540,9 @@ const QUESTIONS = [
       { tiers: ["Get really excited and pump them up", "Bring contagious energy and enthusiasm", "Lead with passion and inspire them"], dim: "LEAD", weight: 3 },
       { tiers: ["Show them all the reasons why it makes sense", "Walk them through a logical case", "Build a clear, evidence-backed argument"], dim: "ANALYZE", weight: 2 },
       { tiers: ["Tell them a story that shows why it's cool", "Tell a story that paints the picture", "Use narrative to bring the idea to life"], dim: "CONNECT", weight: 3 },
-      { tiers: ["Just show them — demonstrate it", "Show, don't tell — give them the experience", "Demonstrate it, prototype it, let them see it work"], dim: "BUILD", weight: 2 }
+      { tiers: ["Just show them — demonstrate it", "Show, don't tell — give them the experience", "Demonstrate it, prototype it, let them see it work"], dim: "BUILD", weight: 2 },
+      { tiers: ["I wouldn't push — let them decide on their own", "I wouldn't pressure — give them space to choose", "I wouldn't push — respect their pace and choice"], dim: "REST", weight: 3 },
+      { tiers: ["A different way to convince them", "A different approach", "A different persuasion style"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1449,7 +1559,9 @@ const QUESTIONS = [
       { tiers: ["Shop class — building actual stuff with tools", "Engineering, woodworking, mechanics", "Hands-on craft — woodworking, mechanics, construction"], dim: "BUILD", weight: 3 },
       { tiers: ["Art, music, or drama class", "Art, design, music, or theater", "Studio arts, music, design, or performance"], dim: "CREATE", weight: 3 },
       { tiers: ["Science class with experiments", "Lab science with real experiments", "Scientific research with hands-on experimentation"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Math because it makes sense", "Math — clean, logical, satisfying", "Mathematics, statistics, formal reasoning"], dim: "ANALYZE", weight: 3 }
+      { tiers: ["Math because it makes sense", "Math — clean, logical, satisfying", "Mathematics, statistics, formal reasoning"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["A free period — read, rest, do my own thing", "Study hall or free period — quiet self-directed time", "A self-paced reflective course — philosophy, contemplative studies"], dim: "REST", weight: 3 },
+      { tiers: ["A different subject I love", "A different subject not listed", "A different field of study"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1464,7 +1576,9 @@ const QUESTIONS = [
       { tiers: ["Turn it into a fort, robot, or spaceship", "Convert it or build something with it", "Repurpose it into a project or build"], dim: "BUILD", weight: 3 },
       { tiers: ["Decorate it and turn it into art", "Transform it into something creative or beautiful", "Use it as material for a creative work"], dim: "CREATE", weight: 2 },
       { tiers: ["Take it apart to see how it works", "Study how it works and what it can do", "Investigate its mechanism and capabilities"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Organize all my stuff inside it", "Use it to organize something in my life", "Put it to use in a system I'm building"], dim: "ORGANIZE", weight: 3 }
+      { tiers: ["Organize all my stuff inside it", "Use it to organize something in my life", "Put it to use in a system I'm building"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Leave it alone — I don't need a project", "Leave it — I'm not looking for projects", "Leave it be — not every object needs a purpose"], dim: "REST", weight: 3 },
+      { tiers: ["Something else I'd do with it", "A different use for it", "A different use entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1479,7 +1593,9 @@ const QUESTIONS = [
       { tiers: ["Making things with my hands", "Working with my hands — building, crafting", "Tactile, hands-on creation"], dim: "BUILD", weight: 3 },
       { tiers: ["Reading or watching stories", "Getting lost in stories and ideas", "Immersing myself in narrative and ideas"], dim: "CONNECT", weight: 2 },
       { tiers: ["Running around and being active", "Physical activity, sports, movement", "Active, embodied work — movement, the outdoors"], dim: "BUILD", weight: 2 },
-      { tiers: ["Quietly figuring out a hard problem", "Sitting with a hard problem until I crack it", "Deep focus on a complex problem"], dim: "ANALYZE", weight: 3 }
+      { tiers: ["Quietly figuring out a hard problem", "Sitting with a hard problem until I crack it", "Deep focus on a complex problem"], dim: "ANALYZE", weight: 3 },
+      { tiers: ["Just resting, doing nothing in particular", "Doing absolutely nothing — rest IS my play", "Stillness — being present without doing"], dim: "REST", weight: 3 },
+      { tiers: ["Something else feels like play to me", "A different kind of fun", "A different kind of play altogether"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1496,7 +1612,9 @@ const QUESTIONS = [
       { tiers: ["Super neat — everything has a place", "Highly organized — I love a clean system", "Meticulously organized — systems for everything"], dim: "ORGANIZE", weight: 3 },
       { tiers: ["Creative chaos — I know where stuff is", "Creative chaos that makes sense to me", "Productive disorder — chaos to others, navigable to me"], dim: "CREATE", weight: 2 },
       { tiers: ["Full of projects I'm working on", "Filled with projects in various stages", "Always mid-build — projects everywhere"], dim: "BUILD", weight: 2 },
-      { tiers: ["Books, posters, things I've collected", "Books and meaningful things I've collected", "Curated — books, art, objects with meaning"], dim: "EXPLORE", weight: 2 }
+      { tiers: ["Books, posters, things I've collected", "Books and meaningful things I've collected", "Curated — books, art, objects with meaning"], dim: "EXPLORE", weight: 2 },
+      { tiers: ["Cozy and chill — set up for relaxing", "Calm and cozy — built for rest and relaxation", "A retreat — calm, restful, designed for restoration"], dim: "REST", weight: 3 },
+      { tiers: ["Something else describes my space", "A different vibe entirely", "A different aesthetic entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1511,7 +1629,9 @@ const QUESTIONS = [
       { tiers: ["Make a list with every single detail", "Create a detailed plan with every step", "Build a comprehensive plan, timeline, checklist"], dim: "ORGANIZE", weight: 3 },
       { tiers: ["Come up with the coolest theme ever", "Build it around a powerful theme or concept", "Design the experience around a strong creative concept"], dim: "CREATE", weight: 3 },
       { tiers: ["Figure out who would have the most fun together", "Curate the guest list for the right vibe", "Engineer the social mix carefully"], dim: "CONNECT", weight: 2 },
-      { tiers: ["Just wing it and see what happens", "Keep it loose and improvise", "Set the conditions and let it unfold"], dim: "EXPLORE", weight: 1 }
+      { tiers: ["Just wing it and see what happens", "Keep it loose and improvise", "Set the conditions and let it unfold"], dim: "EXPLORE", weight: 1 },
+      { tiers: ["I wouldn't plan it — I'd just enjoy whatever happens", "Hand it off to someone who likes planning more", "Outsource it — I'd rather just show up and enjoy"], dim: "REST", weight: 3 },
+      { tiers: ["A different planning approach", "A different way I'd plan", "A different planning style"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1526,7 +1646,9 @@ const QUESTIONS = [
       { tiers: ["Healing people who are hurt", "Healing — making people whole again", "The ability to heal and restore"], dim: "HELP", weight: 3 },
       { tiers: ["Knowing every fact in the world", "Knowing the answer to any question", "Perfect knowledge — instant understanding of anything"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Building anything just by thinking it", "Manifesting anything you can imagine", "The power to bring any creation into being"], dim: "CREATE", weight: 3 },
-      { tiers: ["Reading minds so you understand people", "Seeing what people really feel and think", "Deep insight into others' inner worlds"], dim: "CONNECT", weight: 3 }
+      { tiers: ["Reading minds so you understand people", "Seeing what people really feel and think", "Deep insight into others' inner worlds"], dim: "CONNECT", weight: 3 },
+      { tiers: ["Always feeling calm and at peace", "Inner peace and total calm in any situation", "Unshakeable inner peace — calm in any storm"], dim: "REST", weight: 3 },
+      { tiers: ["A different superpower I'd want", "A different power", "A different ability I'd want"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1543,7 +1665,9 @@ const QUESTIONS = [
       { tiers: ["Super curious — I HAVE to know more", "Insatiably curious — I dig in immediately", "Driven to investigate — I have to understand it"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Inspired to make something based on it", "Inspired to create something around it", "Creatively sparked — it becomes raw material"], dim: "CREATE", weight: 2 },
       { tiers: ["Excited to share it with my friends", "Excited to tell people about it", "Compelled to share it and discuss it"], dim: "CONNECT", weight: 2 },
-      { tiers: ["Curious about how it works inside", "Want to understand its inner mechanics", "Drawn to take it apart and analyze it"], dim: "ANALYZE", weight: 2 }
+      { tiers: ["Curious about how it works inside", "Want to understand its inner mechanics", "Drawn to take it apart and analyze it"], dim: "ANALYZE", weight: 2 },
+      { tiers: ["I appreciate it quietly without needing more", "I notice it and let it be — no need to dig in", "I appreciate it without needing to chase or analyze"], dim: "REST", weight: 3 },
+      { tiers: ["I react in a different way", "A different reaction I have", "A different response entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1558,7 +1682,9 @@ const QUESTIONS = [
       { tiers: ["Somewhere wild — jungles, mountains, ocean", "Somewhere wild and remote — nature, wilderness", "A remote, untamed place — wilderness, expedition"], dim: "EXPLORE", weight: 3 },
       { tiers: ["A big city with lots of art and food", "A creative city — Paris, Tokyo, Barcelona", "A cultural capital rich in art, design, history"], dim: "CREATE", weight: 2 },
       { tiers: ["A place that needs help, to volunteer", "Somewhere I could volunteer and contribute", "A place where I can do meaningful service work"], dim: "HELP", weight: 3 },
-      { tiers: ["Somewhere with cool architecture and museums", "A place with great museums and architecture", "A place with rich intellectual and cultural depth"], dim: "EXPLORE", weight: 2 }
+      { tiers: ["Somewhere with cool architecture and museums", "A place with great museums and architecture", "A place with rich intellectual and cultural depth"], dim: "EXPLORE", weight: 2 },
+      { tiers: ["A quiet beach or peaceful retreat", "A peaceful retreat — beach, mountains, monastery", "A silent retreat — Bali, Himalayas, Kyoto monasteries"], dim: "REST", weight: 3 },
+      { tiers: ["A different place I'd go", "A different destination", "A different destination entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1573,7 +1699,9 @@ const QUESTIONS = [
       { tiers: ["How does the universe work?", "How does the universe actually work?", "Fundamental questions — physics, consciousness, origins"], dim: "EXPLORE", weight: 3 },
       { tiers: ["How can I make this thing better?", "How could this be designed better?", "How can this be redesigned for greater impact?"], dim: "CREATE", weight: 2 },
       { tiers: ["Why do people do what they do?", "Why do people behave the way they do?", "What drives human behavior and motivation?"], dim: "CONNECT", weight: 3 },
-      { tiers: ["How can I help someone with this?", "How can this knowledge help someone?", "How can I apply this to make life better for others?"], dim: "HELP", weight: 2 }
+      { tiers: ["How can I help someone with this?", "How can this knowledge help someone?", "How can I apply this to make life better for others?"], dim: "HELP", weight: 2 },
+      { tiers: ["What does it mean to live a good, peaceful life?", "How can I live more simply and mindfully?", "How do I live well, slowly, with intention?"], dim: "REST", weight: 3 },
+      { tiers: ["A different question I think about", "A different deep question", "A different fundamental question"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1590,7 +1718,9 @@ const QUESTIONS = [
       { tiers: ["AMAZING — I'll talk to everyone", "Energized — I love meeting new people", "Energized — I light up around people"], dim: "CONNECT", weight: 3 },
       { tiers: ["I'd rather hang with one or two close friends", "I'd rather have deep talks with a few people", "I'd rather go deep with two or three people"], dim: "HELP", weight: 2 },
       { tiers: ["I'd rather be home making something cool", "I'd prefer to be home working on something", "I'd genuinely rather be home creating"], dim: "CREATE", weight: 2 },
-      { tiers: ["I'd watch people and figure out how it all works", "I'd people-watch and analyze the dynamics", "I'd observe the social dynamics with interest"], dim: "ANALYZE", weight: 2 }
+      { tiers: ["I'd watch people and figure out how it all works", "I'd people-watch and analyze the dynamics", "I'd observe the social dynamics with interest"], dim: "ANALYZE", weight: 2 },
+      { tiers: ["Tired thinking about it — I'd rather stay in", "Tiring — I'd rather stay home and rest", "Draining — I'd choose solitude over the crowd"], dim: "REST", weight: 3 },
+      { tiers: ["A different reaction I have", "A different feeling about it", "A different response to social events"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1605,7 +1735,9 @@ const QUESTIONS = [
       { tiers: ["The funny one who tells stories", "The storyteller — I keep things interesting", "The communicator — I tell the stories, hold the threads"], dim: "CONNECT", weight: 3 },
       { tiers: ["The leader who makes plans happen", "The one who actually makes plans happen", "The organizer — I make things happen"], dim: "LEAD", weight: 3 },
       { tiers: ["The advisor everyone goes to with problems", "The one people come to for advice", "The advisor people seek out for hard moments"], dim: "HELP", weight: 3 },
-      { tiers: ["The thinker who notices things others don't", "The observer who sees what others miss", "The thoughtful one — I notice what others overlook"], dim: "ANALYZE", weight: 2 }
+      { tiers: ["The thinker who notices things others don't", "The observer who sees what others miss", "The thoughtful one — I notice what others overlook"], dim: "ANALYZE", weight: 2 },
+      { tiers: ["The chill one who just goes with the flow", "The chill one — calm, present, low-drama", "The grounded one — calm presence, low-drama"], dim: "REST", weight: 3 },
+      { tiers: ["A different role I play", "A different role in my friend group", "A different role I take"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1620,7 +1752,9 @@ const QUESTIONS = [
       { tiers: ["Telling stories or interviewing cool people", "Interviews, storytelling, conversations", "Long-form interviews and human stories"], dim: "CONNECT", weight: 3 },
       { tiers: ["How to make or build amazing things", "Building, making, DIY tutorials", "Craft, building, design tutorials"], dim: "BUILD", weight: 3 },
       { tiers: ["Teaching kids about science or how stuff works", "Explaining science, history, or ideas", "Educational deep-dives — science, philosophy, ideas"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Helping people solve their problems", "Self-improvement, helping people grow", "Coaching, advice, self-development"], dim: "HELP", weight: 3 }
+      { tiers: ["Helping people solve their problems", "Self-improvement, helping people grow", "Coaching, advice, self-development"], dim: "HELP", weight: 3 },
+      { tiers: ["Calming videos — meditation, ASMR, slow living", "Slow content — meditation, mindfulness, slow living", "Mindfulness, contemplation, slow living content"], dim: "REST", weight: 3 },
+      { tiers: ["A different topic I'd cover", "A different channel topic", "A different focus area"], dim: "REST", weight: 1 }
     ]
   },
 
@@ -1637,7 +1771,9 @@ const QUESTIONS = [
       { tiers: ["Making the world a better place", "Making a positive difference in people's lives", "Leaving things better than I found them"], dim: "HELP", weight: 3 },
       { tiers: ["Creating something amazing that lasts", "Making something original that lasts", "Producing creative work of lasting value"], dim: "CREATE", weight: 3 },
       { tiers: ["Discovering something nobody knew before", "Discovering or learning something new", "Pushing the boundaries of what's known"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Leading something big and important", "Leading a meaningful organization or movement", "Leading a meaningful institution or movement"], dim: "LEAD", weight: 3 }
+      { tiers: ["Leading something big and important", "Leading a meaningful organization or movement", "Leading a meaningful institution or movement"], dim: "LEAD", weight: 3 },
+      { tiers: ["Living a peaceful, simple life", "Having a simple, peaceful, balanced life", "Living deliberately — peace and presence over achievement"], dim: "REST", weight: 3 },
+      { tiers: ["Something else would matter to me", "A different priority", "A different priority altogether"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1652,7 +1788,9 @@ const QUESTIONS = [
       { tiers: ["Drawing it or making a picture in my head", "Visualizing it or sketching it out", "Visual representations — diagrams, mind maps"], dim: "CREATE", weight: 2 },
       { tiers: ["Saying it out loud or making it a song", "Saying it aloud or turning it into a story", "Talking it through, narrating it"], dim: "CONNECT", weight: 2 },
       { tiers: ["Writing it down very neatly", "Writing it down in an organized way", "Writing structured notes I can revisit"], dim: "ORGANIZE", weight: 3 },
-      { tiers: ["Doing it with my hands a few times", "Practicing it with my hands repeatedly", "Repetition with hands-on practice"], dim: "BUILD", weight: 2 }
+      { tiers: ["Doing it with my hands a few times", "Practicing it with my hands repeatedly", "Repetition with hands-on practice"], dim: "BUILD", weight: 2 },
+      { tiers: ["I let it come back to me naturally", "Rest on it — sleep helps things stick", "Sleep on it — rest consolidates memory"], dim: "REST", weight: 3 },
+      { tiers: ["A different way I remember", "A different memory technique", "A different memory technique"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1667,7 +1805,9 @@ const QUESTIONS = [
       { tiers: ["Inventing or building something new", "Designing and prototyping a new idea", "Working on a personal creative or build project"], dim: "BUILD", weight: 3 },
       { tiers: ["Reading or learning about something fascinating", "Reading deeply about something fascinating", "Reading or studying something that captivates me"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Hanging out and helping a friend with something", "Helping a friend through something", "Spending real time supporting someone"], dim: "HELP", weight: 3 },
-      { tiers: ["Organizing my stuff so it's perfect", "Reorganizing or refining a system", "Refining a system or process I care about"], dim: "ORGANIZE", weight: 3 }
+      { tiers: ["Organizing my stuff so it's perfect", "Reorganizing or refining a system", "Refining a system or process I care about"], dim: "ORGANIZE", weight: 3 },
+      { tiers: ["Resting completely — nap, lounge, do nothing", "Doing absolutely nothing — total rest day", "A pure rest day — nap, read, drift"], dim: "REST", weight: 3 },
+      { tiers: ["A different way I'd spend it", "A different activity", "A different use of the time"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1682,7 +1822,9 @@ const QUESTIONS = [
       { tiers: ["When I figure out something hard", "When I crack a difficult problem", "Solving something hard that others gave up on"], dim: "ANALYZE", weight: 3 },
       { tiers: ["When something I made turns out great", "When something I created comes out beautifully", "Producing creative work that exceeds my own expectations"], dim: "CREATE", weight: 3 },
       { tiers: ["When I help someone feel better", "When I help someone through something hard", "Making a real difference for someone in a hard moment"], dim: "HELP", weight: 3 },
-      { tiers: ["When I lead my team to win", "When I rally people and we succeed together", "Leading a team to accomplish something significant"], dim: "LEAD", weight: 3 }
+      { tiers: ["When I lead my team to win", "When I rally people and we succeed together", "Leading a team to accomplish something significant"], dim: "LEAD", weight: 3 },
+      { tiers: ["When I take real care of myself and rest well", "When I honor my limits and rest properly", "When I respect my limits and prioritize wellbeing"], dim: "REST", weight: 3 },
+      { tiers: ["Something else makes me proud", "A different source of pride", "A different source of pride"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1697,7 +1839,9 @@ const QUESTIONS = [
       { tiers: ["Designing your own video game", "Designing a video game or app", "Designing software or a digital product"], dim: "CREATE", weight: 3 },
       { tiers: ["Doing experiments in a lab", "Running experiments in a lab", "Doing original research in a lab or field"], dim: "EXPLORE", weight: 3 },
       { tiers: ["Coaching a team to win a championship", "Coaching a team to victory", "Coaching or mentoring a high-performing team"], dim: "LEAD", weight: 3 },
-      { tiers: ["Building a treehouse from scratch", "Building something from raw materials", "Building something physical and lasting from scratch"], dim: "BUILD", weight: 3 }
+      { tiers: ["Building a treehouse from scratch", "Building something from raw materials", "Building something physical and lasting from scratch"], dim: "BUILD", weight: 3 },
+      { tiers: ["Just chilling out — nothing required of me", "Doing nothing — completely unstructured time", "Unstructured time — nothing required, just being"], dim: "REST", weight: 3 },
+      { tiers: ["A different option I'd pick", "A different choice", "A different option entirely"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1712,7 +1856,9 @@ const QUESTIONS = [
       { tiers: ["You're really creative and have cool ideas", "You're so creative — you see things differently", "You're remarkably creative and original"], dim: "CREATE", weight: 3 },
       { tiers: ["You're really smart and figure things out", "You're so smart — you grasp things fast", "You're sharp — you cut through complexity"], dim: "ANALYZE", weight: 3 },
       { tiers: ["You're so kind and you help everyone", "You're really kind — people trust you", "You're deeply kind, and people open up to you"], dim: "HELP", weight: 3 },
-      { tiers: ["You're a leader — people follow you", "You're a natural leader — people follow you", "You have natural authority — people listen"], dim: "LEAD", weight: 3 }
+      { tiers: ["You're a leader — people follow you", "You're a natural leader — people follow you", "You have natural authority — people listen"], dim: "LEAD", weight: 3 },
+      { tiers: ["You're so calm and peaceful to be around", "You're so calm and grounding", "You bring a calming, grounding presence"], dim: "REST", weight: 3 },
+      { tiers: ["Something else people say", "A different compliment I get", "A different feedback I receive"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1727,7 +1873,9 @@ const QUESTIONS = [
       { tiers: ["Working at an art studio or theater", "Working at an art studio, gallery, or theater", "A creative studio — design, art, production"], dim: "CREATE", weight: 3 },
       { tiers: ["Helping at an animal shelter or hospital", "Helping at a shelter, clinic, or community center", "Service work at a clinic, shelter, or NGO"], dim: "HELP", weight: 3 },
       { tiers: ["Working at a science museum or zoo", "Working at a museum, lab, or research center", "Research assistant role at a lab or institute"], dim: "EXPLORE", weight: 3 },
-      { tiers: ["Helping run a business or shop", "Helping run a small business", "Building or running a small business"], dim: "LEAD", weight: 3 }
+      { tiers: ["Helping run a business or shop", "Helping run a small business", "Building or running a small business"], dim: "LEAD", weight: 3 },
+      { tiers: ["Working at a quiet bookstore, library, or spa", "A quiet bookstore, library, yoga studio, or wellness space", "A wellness retreat, library, or contemplative space"], dim: "REST", weight: 3 },
+      { tiers: ["A different job I'd love", "A different role", "A different work environment"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1742,7 +1890,9 @@ const QUESTIONS = [
       { tiers: ["The visuals — colors, sets, costumes", "Cinematography, sets, design, visual storytelling", "Direction, cinematography, production design"], dim: "CREATE", weight: 3 },
       { tiers: ["The plot — does it all add up?", "The plot's logic and structure", "Narrative architecture and internal consistency"], dim: "ANALYZE", weight: 3 },
       { tiers: ["The characters and how they feel", "The characters and emotional arcs", "Character development and emotional truth"], dim: "CONNECT", weight: 3 },
-      { tiers: ["The cool things they built or made", "How they built the props and effects", "The craft — practical effects, sets, builds"], dim: "BUILD", weight: 2 }
+      { tiers: ["The cool things they built or made", "How they built the props and effects", "The craft — practical effects, sets, builds"], dim: "BUILD", weight: 2 },
+      { tiers: ["The mood, atmosphere, how it makes me feel", "The mood and atmosphere — how it FEELS", "The mood, pacing, atmospheric texture"], dim: "REST", weight: 3 },
+      { tiers: ["A different thing I notice", "A different element catches me", "A different element draws me"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1757,7 +1907,9 @@ const QUESTIONS = [
       { tiers: ["Make classes more creative and fun", "Make it more creative and inspiring", "Build more creative space into the daily routine"], dim: "CREATE", weight: 2 },
       { tiers: ["Make a club to help younger kids", "Start a peer support or mentoring program", "Establish a mentoring or community program"], dim: "HELP", weight: 3 },
       { tiers: ["Make everything more organized and clear", "Make systems clearer and more efficient", "Streamline systems and improve clarity"], dim: "ORGANIZE", weight: 3 },
-      { tiers: ["Have more hands-on projects and labs", "Have more hands-on projects and real work", "Build in more applied, hands-on work"], dim: "BUILD", weight: 3 }
+      { tiers: ["Have more hands-on projects and labs", "Have more hands-on projects and real work", "Build in more applied, hands-on work"], dim: "BUILD", weight: 3 },
+      { tiers: ["More breaks, naps, and quiet time", "Add real rest periods — naps, quiet rooms", "Build in real recovery time — quiet, breaks, mental space"], dim: "REST", weight: 3 },
+      { tiers: ["A different change I'd make", "A different improvement", "A different improvement"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1772,7 +1924,9 @@ const QUESTIONS = [
       { tiers: ["A musical instrument or a sport", "An instrument, a sport, or a craft", "A craft, instrument, or physical discipline"], dim: "BUILD", weight: 3 },
       { tiers: ["Speaking many languages", "Speaking multiple languages fluently", "Communication across multiple languages and cultures"], dim: "CONNECT", weight: 3 },
       { tiers: ["Math or science problems", "A scientific or technical field", "A specialized scientific or technical domain"], dim: "ANALYZE", weight: 3 },
-      { tiers: ["Writing or making art", "Writing, painting, or filmmaking", "A serious creative discipline — writing, art, film"], dim: "CREATE", weight: 3 }
+      { tiers: ["Writing or making art", "Writing, painting, or filmmaking", "A serious creative discipline — writing, art, film"], dim: "CREATE", weight: 3 },
+      { tiers: ["Yoga, meditation, or being completely present", "Yoga, meditation, mindful presence", "Contemplative arts — meditation, yoga, presence"], dim: "REST", weight: 3 },
+      { tiers: ["A different skill I'd master", "A different talent", "A different mastery"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1787,7 +1941,9 @@ const QUESTIONS = [
       { tiers: ["One who lets you build and try things", "One who lets you experiment and build", "One who gives you the room to try and build"], dim: "BUILD", weight: 3 },
       { tiers: ["One who makes you think really hard", "One who challenges your thinking deeply", "One who pushes you intellectually"], dim: "ANALYZE", weight: 3 },
       { tiers: ["One who really cares about you as a person", "One who actually cares who you are as a person", "One who sees you as a whole person"], dim: "HELP", weight: 3 },
-      { tiers: ["One who tells amazing stories", "One who's a brilliant storyteller", "One whose ideas live on through powerful stories"], dim: "CONNECT", weight: 3 }
+      { tiers: ["One who tells amazing stories", "One who's a brilliant storyteller", "One whose ideas live on through powerful stories"], dim: "CONNECT", weight: 3 },
+      { tiers: ["One who lets you go at your own pace", "One who respects your pace and doesn't push", "One who honors your pace and creates space to think"], dim: "REST", weight: 3 },
+      { tiers: ["A different kind of teacher", "A different type of mentor", "A different kind of mentor"], dim: "REST", weight: 1 }
     ]
   },
   {
@@ -1802,7 +1958,9 @@ const QUESTIONS = [
       { tiers: ["You're a really good person", "You made me feel truly seen and understood", "You changed how I see something — or myself"], dim: "HELP", weight: 3 },
       { tiers: ["You're really smart", "You made me think in a completely new way", "You think with rare clarity and depth"], dim: "ANALYZE", weight: 3 },
       { tiers: ["You make the COOLEST stuff", "You make work I've never seen before", "Your creative work is genuinely original"], dim: "CREATE", weight: 3 },
-      { tiers: ["I'd follow you anywhere", "I'd follow your lead anywhere", "I'd trust your leadership in any room"], dim: "LEAD", weight: 3 }
+      { tiers: ["I'd follow you anywhere", "I'd follow your lead anywhere", "I'd trust your leadership in any room"], dim: "LEAD", weight: 3 },
+      { tiers: ["You're a peaceful, grounding person to be around", "You bring such calm and peace into the room", "Being near you brings me peace"], dim: "REST", weight: 3 },
+      { tiers: ["A different compliment matters to me", "A different kind of recognition", "A different form of recognition"], dim: "REST", weight: 1 }
     ]
   },
   // ============ REASONING ABILITY QUESTIONS ============
@@ -1937,7 +2095,17 @@ const ARCHETYPES = {
   "BUILD+CONNECT": { name: "The Coach", desc: "You teach through doing. You're at your best when you can show someone how — physically demonstrating skill while building real relationship." },
   "ORGANIZE+EXPLORE": { name: "The Curator", desc: "You bring order to vast bodies of knowledge or material. You belong in libraries, archives, museums, research operations — anywhere meaning is preserved and structured." },
   "ORGANIZE+CONNECT": { name: "The Producer", desc: "You make creative or social work actually happen. Behind every great event, show, or campaign, there's someone like you making the gears turn." },
-  "EXPLORE+CONNECT": { name: "The Journalist", desc: "You investigate and translate. You go find the truth — and you have the gift to bring it back in stories people actually want to hear." }
+  "EXPLORE+CONNECT": { name: "The Journalist", desc: "You investigate and translate. You go find the truth — and you have the gift to bring it back in stories people actually want to hear." },
+  // REST-based archetypes
+  "REST+CREATE": { name: "The Mindful Maker", desc: "You make slowly, deeply, and with intention. Your creative work emerges from stillness — meditation app design, slow craft, contemplative art. The world needs more of what you bring." },
+  "REST+ANALYZE": { name: "The Observer", desc: "You think deeply because you sit still. Writers, philosophers, critics, researchers — your gift is patient observation and clear, unhurried analysis." },
+  "REST+HELP": { name: "The Healer", desc: "You help by holding space, not by fixing. Hospice workers, therapists, contemplative caregivers — your presence is the medicine." },
+  "REST+LEAD": { name: "The Quiet Leader", desc: "You lead by example, not by force. Your calm presence gives others permission to slow down too. Leadership without burnout." },
+  "REST+BUILD": { name: "The Slow Craftsman", desc: "You make things the old way — by hand, with patience, refusing to rush. Wood, food, cloth, garden — your craft honors time itself." },
+  "REST+ORGANIZE": { name: "The Curator of Calm", desc: "You design environments and routines that help people slow down. Wellness retreats, libraries, sanctuaries — you create the spaces others rest in." },
+  "REST+EXPLORE": { name: "The Contemplative", desc: "You explore inward as deeply as others explore outward. Philosophy, meditation, spiritual inquiry — your discoveries are quieter but no less profound." },
+  "REST+CONNECT": { name: "The Listener", desc: "You connect through deep, patient presence. People feel heard around you. Counselors, hospice chaplains, deep-conversation hosts — your gift is silence as much as speech." },
+  "REST+REASONING": { name: "The Wise One", desc: "Clear thinking emerges from stillness. You combine logical clarity with patient reflection — judges, philosophers, mediators, advisors of the slow kind." }
 };
 
 const FALLBACK_ARCHETYPE = { name: "The Original", desc: "You don't fit a single mold — and that's a strength. Your profile shows real range across multiple dimensions, which means you can adapt, bridge worlds, and find your own path. Your work is to choose where to go deep." };
@@ -2026,6 +2194,16 @@ const CAREERS = {
     { name: "Translator / Interpreter", why: "Bridges languages and cultures" },
     { name: "Community Organizer", why: "Brings people together around shared causes" },
     { name: "Brand Strategist", why: "Builds how companies connect with their audiences" }
+  ],
+  REST: [
+    { name: "Yoga Teacher / Instructor", why: "Guides others into stillness, breath, and physical mindfulness" },
+    { name: "Meditation Teacher", why: "Teaches the lifelong skill of being present and at peace" },
+    { name: "Hospice / Palliative Care Worker", why: "Holds sacred space for people in life's final chapters" },
+    { name: "Wellness Retreat Host", why: "Designs and runs spaces where people come to slow down" },
+    { name: "Massage Therapist / Bodyworker", why: "Helps people reconnect with their bodies through touch" },
+    { name: "Librarian", why: "Curates quiet spaces where minds wander and rest" },
+    { name: "Spiritual Counselor / Chaplain", why: "Walks alongside people in their search for meaning" },
+    { name: "Sleep Coach / Researcher", why: "Helps people rest deeply in a world that won't let them" }
   ]
 };
 
@@ -2040,7 +2218,8 @@ const INDUSTRIES = {
   BUILD: ["Engineering & Manufacturing", "Construction & Architecture", "Culinary Arts", "Skilled Trades", "Robotics & Hardware", "Agriculture"],
   ORGANIZE: ["Operations & Supply Chain", "Accounting & Finance", "Project Management", "Logistics", "Civil Service", "Information Management"],
   EXPLORE: ["Scientific Research", "Academia", "Journalism & Investigation", "Museums & Cultural Heritage", "Field Sciences", "Think Tanks & Policy"],
-  CONNECT: ["Media & Communications", "Marketing & Advertising", "Public Relations", "International Relations", "Hospitality", "Community Development"]
+  CONNECT: ["Media & Communications", "Marketing & Advertising", "Public Relations", "International Relations", "Hospitality", "Community Development"],
+  REST: ["Wellness & Mindfulness", "Yoga & Meditation", "Hospice & Palliative Care", "Spirituality & Religion", "Wellness Tourism & Retreats", "Mental Health & Therapy", "Library Sciences", "Slow Living & Sustainability"]
 };
 
 /* ============================================================
@@ -2207,6 +2386,26 @@ const PATHS_BY_DIM = {
       "Build your relational discipline — the people in your life are your real career capital.",
       "Find roles where communication is a core lever, not a side skill."
     ]
+  },
+  REST: {
+    kid: [
+      "Trust your need for rest — it's not laziness, it's how you recharge and grow.",
+      "Try yoga, meditation, journaling, or quiet hobbies like drawing or reading.",
+      "Spend time in nature — parks, gardens, the outdoors — without screens.",
+      "Notice what truly relaxes you and protect that time fiercely."
+    ],
+    teen: [
+      "Don't let the world's pace become your pace — find your own.",
+      "Explore meditation, yoga, mindfulness practices seriously (apps, classes, books).",
+      "Consider careers that match your nature: wellness, libraries, hospice work, contemplative arts.",
+      "Read about slow living, philosophy, or spirituality — find your tradition."
+    ],
+    adult: [
+      "Honor what you know about yourself — slow living is a valid life choice, not a failure.",
+      "Look at careers in wellness, hospice, contemplative arts, libraries, or spiritual practice.",
+      "Build a sustainable routine that protects your energy, not depletes it.",
+      "Consider deeper training — yoga teacher, meditation, counseling, retreat hosting."
+    ]
   }
 };
 
@@ -2222,7 +2421,7 @@ let state = {
   ageTier: 1,
   parentConsent: false,
   currentQ: 0,
-  answers: {}, // questionId -> {dim, weight}
+  answers: {}, // questionId -> {dim,weight} for reasoning OR [{dim,weight,isRest,isOther},...] for multi-select
   scores: {},
   startTime: null
 };
@@ -2364,69 +2563,189 @@ const progressSection = document.getElementById('progress-section');
 const prevBtn = document.getElementById('prev-btn');
 const skipBtn = document.getElementById('skip-btn');
 
+// Auto-inject REST and OTHER options for non-reasoning questions
+function getQuestionOptions(q) {
+  if (q.isReasoning) return q.options; // Don't add to reasoning Qs
+
+  const restOption = {
+    tiers: [
+      "I'd just rest, relax, or take it slow",
+      "Honestly, I'd just rest and recharge",
+      "I'd choose to rest, recharge, or be still"
+    ],
+    dim: "REST",
+    weight: 3,
+    isRest: true
+  };
+
+  const otherOption = {
+    tiers: [
+      "Something else (none of these fit me)",
+      "Something else — none of these really fit",
+      "Something else — none of these capture it"
+    ],
+    dim: "REST",
+    weight: 1,
+    isOther: true
+  };
+
+  return [...q.options, restOption, otherOption];
+}
+
 function renderQuestion() {
   const q = QUESTIONS[state.currentQ];
   const tier = state.ageTier;
+  const isReasoning = q.isReasoning === true;
 
   // Update meta
   const num = String(state.currentQ + 1).padStart(2, '0');
-  questionMeta.textContent = `— Question ${num} —`;
+  questionMeta.textContent = isReasoning ? `— Reasoning Question ${num} —` : `— Question ${num} —`;
   questionText.textContent = q.tiers[tier];
 
   // Update progress
   const pct = ((state.currentQ) / QUESTIONS.length) * 100;
   progressFill.style.width = pct + '%';
   progressLabel.textContent = `Question ${state.currentQ + 1} of ${QUESTIONS.length}`;
-  progressSection.textContent = `Section · ${q.section}`;
+  progressSection.textContent = isReasoning ? 'Section · Reasoning Ability' : `Section · ${q.section}`;
 
-  // Render options (shuffle for fairness)
-  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  // Get all options (auto-inject REST + OTHER for personality questions)
+  const allOptions = getQuestionOptions(q);
+
+  // For personality questions: shuffle the original options BUT keep REST and OTHER at the end
+  let displayOptions;
+  if (isReasoning) {
+    displayOptions = [...allOptions].sort(() => Math.random() - 0.5);
+  } else {
+    const original = allOptions.filter(o => !o.isRest && !o.isOther);
+    const special = allOptions.filter(o => o.isRest || o.isOther);
+    const shuffled = [...original].sort(() => Math.random() - 0.5);
+    displayOptions = [...shuffled, ...special];
+  }
+
+  // Render multi-select hint for personality questions
   optionsContainer.innerHTML = '';
-  const markers = ['A', 'B', 'C', 'D', 'E'];
-  shuffled.forEach((opt, idx) => {
+  if (!isReasoning) {
+    const hint = document.createElement('div');
+    hint.className = 'multi-hint';
+    hint.innerHTML = '✓ <strong>Pick one or more</strong> — multiple choices welcome';
+    optionsContainer.appendChild(hint);
+  }
+
+  const markers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const previousAnswers = state.answers[q.id]; // Now an ARRAY for personality, single for reasoning
+
+  displayOptions.forEach((opt, idx) => {
     const btn = document.createElement('button');
     btn.className = 'option';
-    const previousAnswer = state.answers[q.id];
-    if (previousAnswer && previousAnswer.dim === opt.dim && previousAnswer.weight === opt.weight) {
-      btn.classList.add('selected');
+    if (opt.isRest) btn.classList.add('option-rest');
+    if (opt.isOther) btn.classList.add('option-other');
+
+    // Check if previously selected
+    let isSelected = false;
+    if (isReasoning && previousAnswers) {
+      isSelected = previousAnswers.dim === opt.dim && previousAnswers.weight === opt.weight;
+    } else if (!isReasoning && Array.isArray(previousAnswers)) {
+      isSelected = previousAnswers.some(a => a.dim === opt.dim && a.weight === opt.weight && a.isRest === !!opt.isRest && a.isOther === !!opt.isOther);
     }
+    if (isSelected) btn.classList.add('selected');
+
     btn.innerHTML = `
       <span>${opt.tiers[tier]}</span>
       <span class="option-marker">${markers[idx]}</span>
     `;
-    btn.addEventListener('click', () => selectOption(q, opt));
+    btn.addEventListener('click', () => selectOption(q, opt, btn, isReasoning));
     optionsContainer.appendChild(btn);
   });
 
-  // Update buttons
+  // Add Continue button for personality (multi-select), hidden by default
+  if (!isReasoning) {
+    const continueWrap = document.createElement('div');
+    continueWrap.className = 'continue-wrap';
+    continueWrap.innerHTML = `
+      <button class="btn btn-continue" id="continue-btn">
+        Continue <span class="btn-arrow">→</span>
+      </button>
+    `;
+    optionsContainer.appendChild(continueWrap);
+
+    const continueBtn = document.getElementById('continue-btn');
+    continueBtn.disabled = !(Array.isArray(previousAnswers) && previousAnswers.length > 0);
+    continueBtn.addEventListener('click', () => {
+      goToNextQuestion();
+    });
+  }
+
+  // Update nav buttons
   prevBtn.disabled = state.currentQ === 0;
   skipBtn.textContent = state.currentQ === QUESTIONS.length - 1 ? 'Skip & finish →' : 'Skip this question';
 }
 
-function selectOption(question, option) {
-  // If this question already has an answer, subtract it
-  const previous = state.answers[question.id];
-  if (previous) {
-    state.scores[previous.dim] -= previous.weight;
-  }
-
-  // Add new answer
-  state.answers[question.id] = { dim: option.dim, weight: option.weight };
-  state.scores[option.dim] += option.weight;
-
-  // Visual feedback
-  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-
-  // Auto-advance after short delay
-  setTimeout(() => {
-    if (state.currentQ < QUESTIONS.length - 1) {
-      state.currentQ++;
-      renderQuestion();
-    } else {
-      finishTest();
+function selectOption(question, option, btnElement, isReasoning) {
+  if (isReasoning) {
+    // SINGLE SELECT — old behavior
+    const previous = state.answers[question.id];
+    if (previous) {
+      state.scores[previous.dim] -= previous.weight;
     }
-  }, 350);
+    state.answers[question.id] = { dim: option.dim, weight: option.weight };
+    state.scores[option.dim] += option.weight;
+
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    btnElement.classList.add('selected');
+
+    // Auto-advance for reasoning
+    setTimeout(() => {
+      goToNextQuestion();
+    }, 350);
+  } else {
+    // MULTI-SELECT — new behavior
+    let answers = state.answers[question.id];
+    if (!Array.isArray(answers)) answers = [];
+
+    // Find if this option is already selected
+    const existingIdx = answers.findIndex(a =>
+      a.dim === option.dim &&
+      a.weight === option.weight &&
+      a.isRest === !!option.isRest &&
+      a.isOther === !!option.isOther
+    );
+
+    if (existingIdx >= 0) {
+      // DESELECT
+      const removed = answers[existingIdx];
+      state.scores[removed.dim] -= removed.weight;
+      answers.splice(existingIdx, 1);
+      btnElement.classList.remove('selected');
+    } else {
+      // SELECT
+      const newAnswer = {
+        dim: option.dim,
+        weight: option.weight,
+        isRest: !!option.isRest,
+        isOther: !!option.isOther
+      };
+      answers.push(newAnswer);
+      state.scores[option.dim] += option.weight;
+      btnElement.classList.add('selected');
+    }
+
+    state.answers[question.id] = answers;
+
+    // Enable/disable continue button
+    const continueBtn = document.getElementById('continue-btn');
+    if (continueBtn) {
+      continueBtn.disabled = answers.length === 0;
+    }
+  }
+}
+
+function goToNextQuestion() {
+  if (state.currentQ < QUESTIONS.length - 1) {
+    state.currentQ++;
+    renderQuestion();
+  } else {
+    finishTest();
+  }
 }
 
 prevBtn.addEventListener('click', () => {
