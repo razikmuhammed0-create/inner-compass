@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inner Compass — Discover Who You Are</title>
 
+<!-- Open Graph / Social Media Preview -->
+<meta property="og:title" content="Inner Compass — Discover Who You Are" />
+<meta property="og:description" content="A modern psychometric test for ages 10–100. Discover your strengths, archetype, and ideal careers in 36 questions." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://razikmuhammed0-create.github.io/inner-compass/og-preview.png" />
+<meta property="og:url" content="https://razikmuhammed0-create.github.io/inner-compass/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Inner Compass — Discover Who You Are" />
+<meta name="twitter:description" content="Discover your strengths, archetype, and ideal careers in 36 questions." />
+<meta name="description" content="A modern psychometric test for ages 10–100. Discover your strengths, archetype, and ideal careers." />
+
 <!-- ============================================================
      CONFIGURATION — REPLACE THESE WITH YOUR OWN VALUES
      See README/deploy instructions for how to get them.
@@ -875,6 +886,98 @@
     .nav-buttons { flex-direction: column; gap: 12px; }
     .btn, .btn-secondary { width: 100%; justify-content: center; }
   }
+
+  /* ============ RADAR CHART ============ */
+  .radar-container {
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    padding: 40px;
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  #radar-chart {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .radar-caption {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-top: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ============ SHARE BUTTONS ============ */
+  .share-section {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px;
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  .share-heading {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .share-btn {
+    padding: 14px 24px;
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid rgba(245, 240, 230, 0.3);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .share-btn:hover {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+    transform: translateY(-2px);
+  }
+
+  .share-whatsapp:hover { background: #25D366; color: white; border-color: #25D366; }
+  .share-twitter:hover { background: #000; color: white; border-color: #000; }
+
+  .share-copied {
+    background: var(--accent) !important;
+    color: var(--paper) !important;
+    border-color: var(--accent) !important;
+  }
+
+  /* ============ PARENT CONSENT ============ */
+  .parent-consent {
+    border-radius: 0;
+    animation: fadeUp 0.3s ease-out;
+  }
+
+  /* ============ MOBILE SHARE ============ */
+  @media (max-width: 768px) {
+    .radar-container { padding: 24px 16px; }
+    .share-section { padding: 28px 20px; }
+    .share-btn { padding: 12px 18px; font-size: 13px; }
+    .share-buttons { flex-direction: column; }
+    .share-btn { width: 100%; justify-content: center; }
+  }
 </style>
 </head>
 <body>
@@ -914,18 +1017,30 @@
 
       <div class="age-gate">
         <h2>Let's begin</h2>
-        <p>Tell us a little about yourself so we can ask the right questions.</p>
+        <p>Tell us a little about yourself so we can ask the right questions and send you your results.</p>
         <div class="age-input-row">
-          <input type="text" id="user-name" class="name-input" placeholder="Your name (or nickname)" maxlength="30" />
-          <input type="number" id="user-age" class="age-input" placeholder="Your age" min="10" max="100" />
+          <input type="text" id="user-name" class="name-input" placeholder="Your full name *" maxlength="50" required />
+          <input type="number" id="user-age" class="age-input" placeholder="Your age *" min="10" max="100" required />
         </div>
         <div class="age-input-row" style="margin-top: 12px;">
-          <input type="email" id="user-email" class="name-input" placeholder="Email (optional — to save your results)" maxlength="100" />
-          <button class="btn" id="start-btn" disabled>
+          <input type="email" id="user-email" class="name-input" placeholder="Email address *" maxlength="100" required />
+          <input type="tel" id="user-phone" class="name-input" placeholder="Phone number (with country code)" maxlength="20" />
+        </div>
+        <div class="parent-consent" id="parent-consent" style="display:none; margin-top: 16px; padding: 16px; background: var(--paper); border: 1px solid var(--accent);">
+          <label style="display: flex; gap: 12px; align-items: flex-start; cursor: pointer; font-size: 14px;">
+            <input type="checkbox" id="consent-checkbox" style="margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent);" />
+            <span><strong>Parent/Guardian Consent Required:</strong> Since you are under 18, a parent or guardian must agree to your taking this test and sharing this information. By checking this box, I confirm that my parent or guardian has given permission.</span>
+          </label>
+        </div>
+        <div class="age-input-row" style="margin-top: 16px;">
+          <button class="btn" id="start-btn" disabled style="width: 100%;">
             Begin the test <span class="btn-arrow">→</span>
           </button>
         </div>
-        <div class="age-error" id="age-error">Please enter an age between 10 and 100.</div>
+        <div class="age-error" id="age-error">Please complete all required fields. Age must be 10–100.</div>
+        <p style="font-size: 12px; opacity: 0.6; margin-top: 16px; line-height: 1.5;">
+          * Required. We'll send your detailed results to your email. Your data is private and never shared.
+        </p>
       </div>
 
       <div class="pillars">
@@ -990,22 +1105,56 @@
       <p class="archetype-desc" id="archetype-desc">Description loads here.</p>
     </div>
 
+    <!-- Radar Chart -->
     <div class="section-head">
       <span class="section-num">— I —</span>
+      <h3 class="section-title">Your strength profile</h3>
+      <span class="section-rule"></span>
+    </div>
+    <div class="radar-container">
+      <canvas id="radar-chart" width="500" height="500"></canvas>
+      <p class="radar-caption">Your scores across all 8 dimensions of strength</p>
+    </div>
+
+    <!-- Share buttons -->
+    <div class="share-section">
+      <h3 class="share-heading">Share your archetype</h3>
+      <div class="share-buttons">
+        <button class="share-btn share-whatsapp" id="share-whatsapp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          WhatsApp
+        </button>
+        <button class="share-btn share-copy" id="share-copy">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Link
+        </button>
+        <button class="share-btn share-twitter" id="share-twitter">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </button>
+        <button class="share-btn share-email" id="share-email-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Email
+        </button>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">— II —</span>
       <h3 class="section-title">Your top strengths</h3>
       <span class="section-rule"></span>
     </div>
     <div class="strengths-grid" id="strengths-grid"></div>
 
     <div class="section-head">
-      <span class="section-num">— II —</span>
+      <span class="section-num">— III —</span>
       <h3 class="section-title">Careers worth exploring</h3>
       <span class="section-rule"></span>
     </div>
     <div class="career-grid" id="career-grid"></div>
 
     <div class="section-head">
-      <span class="section-num">— III —</span>
+      <span class="section-num">— IV —</span>
       <h3 class="section-title">Industries that fit you</h3>
       <span class="section-rule"></span>
     </div>
@@ -1014,7 +1163,7 @@
     </div>
 
     <div class="section-head">
-      <span class="section-num">— IV —</span>
+      <span class="section-num">— V —</span>
       <h3 class="section-title">Your path forward</h3>
       <span class="section-rule"></span>
     </div>
@@ -1049,7 +1198,8 @@ const DIMENSIONS = {
   BUILD:     { name: "Hands-On Building",    desc: "Making, fixing, and working with the physical world" },
   ORGANIZE:  { name: "Order & Structure",    desc: "Planning, organizing, and bringing systems to life" },
   EXPLORE:   { name: "Discovery & Inquiry",  desc: "Investigating, researching, asking deep questions" },
-  CONNECT:   { name: "People & Communication", desc: "Connecting, storytelling, building relationships" }
+  CONNECT:   { name: "People & Communication", desc: "Connecting, storytelling, building relationships" },
+  REASONING: { name: "Reasoning Ability",    desc: "Logic, pattern recognition, and problem-solving power" }
 };
 
 /* ============================================================
@@ -1615,6 +1765,105 @@ const QUESTIONS = [
       { tiers: ["You make the COOLEST stuff", "You make work I've never seen before", "Your creative work is genuinely original"], dim: "CREATE", weight: 3 },
       { tiers: ["I'd follow you anywhere", "I'd follow your lead anywhere", "I'd trust your leadership in any room"], dim: "LEAD", weight: 3 }
     ]
+  },
+  // ============ REASONING ABILITY QUESTIONS ============
+  // These have a "correct" answer that gives weight 3 to REASONING.
+  // Wrong answers give 0. They test logic, patterns, problem-solving.
+  {
+    id: 37,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "Pick the next number in this pattern: 2, 4, 6, 8, ?",
+      "What number comes next in this sequence: 2, 4, 6, 8, ?",
+      "What number comes next in this sequence: 2, 4, 6, 8, ?"
+    ],
+    options: [
+      { tiers: ["10", "10", "10"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["9", "9", "9"], dim: "REASONING", weight: 0 },
+      { tiers: ["12", "12", "12"], dim: "REASONING", weight: 0 },
+      { tiers: ["11", "11", "11"], dim: "REASONING", weight: 0 }
+    ]
+  },
+  {
+    id: 38,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "If all cats have tails, and Fluffy is a cat, then Fluffy...",
+      "If all cats have tails, and Fluffy is a cat, then Fluffy...",
+      "If all cats have tails, and Fluffy is a cat, what can we conclude about Fluffy?"
+    ],
+    options: [
+      { tiers: ["Has a tail", "Has a tail", "Has a tail"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["Might have a tail", "Might have a tail", "Might have a tail"], dim: "REASONING", weight: 0 },
+      { tiers: ["Doesn't have a tail", "Doesn't have a tail", "Doesn't have a tail"], dim: "REASONING", weight: 0 },
+      { tiers: ["We can't tell", "We can't tell", "We can't tell"], dim: "REASONING", weight: 0 }
+    ]
+  },
+  {
+    id: 39,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "Which one is different? Apple, Banana, Carrot, Orange",
+      "Which one doesn't belong? Apple, Banana, Carrot, Orange",
+      "Identify the odd one out: Apple, Banana, Carrot, Orange"
+    ],
+    options: [
+      { tiers: ["Carrot", "Carrot", "Carrot"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["Apple", "Apple", "Apple"], dim: "REASONING", weight: 0 },
+      { tiers: ["Banana", "Banana", "Banana"], dim: "REASONING", weight: 0 },
+      { tiers: ["Orange", "Orange", "Orange"], dim: "REASONING", weight: 0 }
+    ]
+  },
+  {
+    id: 40,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "Tom is taller than Sam. Sam is taller than Lily. Who is the shortest?",
+      "Tom is taller than Sam. Sam is taller than Lily. Who is the shortest?",
+      "If Tom is taller than Sam, and Sam is taller than Lily, who is the shortest?"
+    ],
+    options: [
+      { tiers: ["Lily", "Lily", "Lily"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["Sam", "Sam", "Sam"], dim: "REASONING", weight: 0 },
+      { tiers: ["Tom", "Tom", "Tom"], dim: "REASONING", weight: 0 },
+      { tiers: ["Can't tell", "Can't tell", "We cannot determine"], dim: "REASONING", weight: 0 }
+    ]
+  },
+  {
+    id: 41,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "What comes next? ▲ ▲▲ ▲▲▲ ?",
+      "Continue the pattern: ▲ ▲▲ ▲▲▲ ?",
+      "Continue the pattern: ▲, ▲▲, ▲▲▲, ?"
+    ],
+    options: [
+      { tiers: ["▲▲▲▲ (4 triangles)", "▲▲▲▲ (4 triangles)", "▲▲▲▲ (4 triangles)"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["▲▲ (2 triangles)", "▲▲ (2 triangles)", "▲▲ (2 triangles)"], dim: "REASONING", weight: 0 },
+      { tiers: ["● (a circle)", "● (a circle)", "● (a circle)"], dim: "REASONING", weight: 0 },
+      { tiers: ["▲ (1 triangle)", "▲ (1 triangle)", "▲ (1 triangle)"], dim: "REASONING", weight: 0 }
+    ]
+  },
+  {
+    id: 42,
+    section: "Reasoning Ability",
+    isReasoning: true,
+    tiers: [
+      "If a pizza has 8 slices and you eat 3, how many are left?",
+      "If a pizza has 8 slices and you eat 3, how many are left?",
+      "A pizza has 8 slices. You eat 3. How many slices remain?"
+    ],
+    options: [
+      { tiers: ["5", "5", "5"], dim: "REASONING", weight: 3, correct: true },
+      { tiers: ["4", "4", "4"], dim: "REASONING", weight: 0 },
+      { tiers: ["6", "6", "6"], dim: "REASONING", weight: 0 },
+      { tiers: ["3", "3", "3"], dim: "REASONING", weight: 0 }
+    ]
   }
 ];
 
@@ -1929,8 +2178,10 @@ const PATHS_BY_DIM = {
 let state = {
   name: "",
   email: "",
+  phone: "",
   age: 0,
   ageTier: 1,
+  parentConsent: false,
   currentQ: 0,
   answers: {}, // questionId -> {dim, weight}
   scores: {},
@@ -1968,16 +2219,60 @@ if (config.SAVE_RESULTS_ENABLED &&
 const nameInput = document.getElementById('user-name');
 const ageInput = document.getElementById('user-age');
 const emailInput = document.getElementById('user-email');
+const phoneInput = document.getElementById('user-phone');
 const startBtn = document.getElementById('start-btn');
 const ageError = document.getElementById('age-error');
+const parentConsentBox = document.getElementById('parent-consent');
+const consentCheckbox = document.getElementById('consent-checkbox');
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone(phone) {
+  // Remove spaces, dashes, parentheses
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  // Must be 7-15 digits, optionally starting with +
+  return /^\+?\d{7,15}$/.test(cleaned);
+}
 
 function checkStartReady() {
   const name = nameInput.value.trim();
   const age = parseInt(ageInput.value);
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
   const validAge = age >= 10 && age <= 100;
-  startBtn.disabled = !(name.length >= 1 && validAge);
+  const validEmail = isValidEmail(email);
+  const isMinor = age < 18;
+  const phoneRequired = !isMinor; // Phone mandatory for adults only
+  const validPhone = phoneRequired ? isValidPhone(phone) : true;
+  const consentOk = isMinor ? consentCheckbox.checked : true;
 
+  // Show/hide parent consent box
+  if (validAge && isMinor) {
+    parentConsentBox.style.display = 'block';
+  } else {
+    parentConsentBox.style.display = 'none';
+    consentCheckbox.checked = false;
+  }
+
+  // Update phone placeholder dynamically
+  phoneInput.placeholder = phoneRequired
+    ? "Phone number with country code *"
+    : "Phone number (optional for under 18)";
+
+  const allValid = name.length >= 2 && validAge && validEmail && validPhone && consentOk;
+  startBtn.disabled = !allValid;
+
+  // Error messages
   if (ageInput.value && !validAge) {
+    ageError.textContent = "Please enter an age between 10 and 100.";
+    ageError.style.display = 'block';
+  } else if (emailInput.value && !validEmail) {
+    ageError.textContent = "Please enter a valid email address.";
+    ageError.style.display = 'block';
+  } else if (phoneInput.value && phoneRequired && !validPhone) {
+    ageError.textContent = "Please enter a valid phone number (e.g., +91 9876543210).";
     ageError.style.display = 'block';
   } else {
     ageError.style.display = 'none';
@@ -1986,12 +2281,17 @@ function checkStartReady() {
 
 nameInput.addEventListener('input', checkStartReady);
 ageInput.addEventListener('input', checkStartReady);
+emailInput.addEventListener('input', checkStartReady);
+phoneInput.addEventListener('input', checkStartReady);
+consentCheckbox.addEventListener('change', checkStartReady);
 
 startBtn.addEventListener('click', () => {
   state.name = nameInput.value.trim();
   state.email = emailInput.value.trim();
+  state.phone = phoneInput.value.trim();
   state.age = parseInt(ageInput.value);
   state.ageTier = getAgeTier(state.age);
+  state.parentConsent = state.age < 18 ? consentCheckbox.checked : false;
   state.currentQ = 0;
   state.answers = {};
   state.startTime = Date.now();
@@ -2000,7 +2300,8 @@ startBtn.addEventListener('click', () => {
   // Track event
   window.gtag('event', 'test_started', {
     age_tier: state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult',
-    has_email: state.email.length > 0
+    has_email: state.email.length > 0,
+    has_phone: state.phone.length > 0
   });
 
   showScreen('test');
@@ -2119,6 +2420,8 @@ async function saveResultsToDatabase(top, second, archetype, sortedScores) {
       .insert([{
         name: state.name,
         email: state.email || null,
+        phone: state.phone || null,
+        parent_consent: state.parentConsent,
         age: state.age,
         age_tier: state.ageTier === 0 ? 'kid' : state.ageTier === 1 ? 'teen' : 'adult',
         primary_dimension: top,
@@ -2249,15 +2552,169 @@ function finishTest() {
   // Update progress fully
   progressFill.style.width = '100%';
 
+  // Draw radar chart
+  drawRadarChart(state.scores);
+
+  // Setup share buttons
+  setupShareButtons(archetype, top);
+
   showScreen('results');
+}
+
+// ============ RADAR CHART ============
+function drawRadarChart(scores) {
+  const canvas = document.getElementById('radar-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Make canvas responsive
+  const containerWidth = canvas.parentElement.offsetWidth;
+  const size = Math.min(500, containerWidth - 40);
+  canvas.width = size;
+  canvas.height = size;
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size * 0.35;
+
+  // Get dimension keys and values
+  const dims = Object.keys(DIMENSIONS);
+  const values = dims.map(d => scores[d] || 0);
+  const maxVal = Math.max(...values, 1);
+  const numAxes = dims.length;
+
+  // Clear
+  ctx.clearRect(0, 0, size, size);
+
+  // Draw grid (concentric polygons)
+  ctx.strokeStyle = 'rgba(26, 24, 21, 0.15)';
+  ctx.lineWidth = 1;
+  for (let level = 1; level <= 5; level++) {
+    const r = (radius / 5) * level;
+    ctx.beginPath();
+    for (let i = 0; i < numAxes; i++) {
+      const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Draw axes
+  ctx.strokeStyle = 'rgba(26, 24, 21, 0.2)';
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+    ctx.stroke();
+  }
+
+  // Draw filled data area
+  ctx.fillStyle = 'rgba(196, 69, 45, 0.3)';
+  ctx.strokeStyle = '#c4452d';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+    const r = (values[i] / maxVal) * radius;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw data points
+  ctx.fillStyle = '#c4452d';
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+    const r = (values[i] / maxVal) * radius;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Draw labels
+  ctx.fillStyle = '#1a1815';
+  ctx.font = `${size > 400 ? '13' : '11'}px DM Sans, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
+    const labelRadius = radius + (size > 400 ? 30 : 22);
+    const x = cx + Math.cos(angle) * labelRadius;
+    const y = cy + Math.sin(angle) * labelRadius;
+    // Short label (first word)
+    const label = DIMENSIONS[dims[i]].name.split(' ')[0];
+    ctx.fillText(label, x, y);
+  }
+}
+
+// ============ SHARE BUTTONS ============
+function setupShareButtons(archetype, topDim) {
+  const url = window.location.href.split('?')[0]; // remove any params
+  const dimName = DIMENSIONS[topDim].name;
+  const shareText = `I just discovered my career archetype on Inner Compass — I'm ${archetype.name}! My top strength is ${dimName}. Take the test and find yours:`;
+
+  // WhatsApp
+  document.getElementById('share-whatsapp').onclick = () => {
+    const text = encodeURIComponent(`${shareText} ${url}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    window.gtag('event', 'share', { method: 'whatsapp', archetype: archetype.name });
+  };
+
+  // Copy link
+  document.getElementById('share-copy').onclick = (e) => {
+    const btn = e.currentTarget;
+    const fullText = `${shareText} ${url}`;
+    navigator.clipboard.writeText(fullText).then(() => {
+      const original = btn.innerHTML;
+      btn.innerHTML = '✓ Copied!';
+      btn.classList.add('share-copied');
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.classList.remove('share-copied');
+      }, 2000);
+    }).catch(() => {
+      alert('Could not copy. Please manually copy: ' + url);
+    });
+    window.gtag('event', 'share', { method: 'copy_link', archetype: archetype.name });
+  };
+
+  // Twitter/X
+  document.getElementById('share-twitter').onclick = () => {
+    const text = encodeURIComponent(shareText);
+    const u = encodeURIComponent(url);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${u}`, '_blank');
+    window.gtag('event', 'share', { method: 'twitter', archetype: archetype.name });
+  };
+
+  // Email
+  document.getElementById('share-email-btn').onclick = () => {
+    const subject = encodeURIComponent(`I'm ${archetype.name} — what about you?`);
+    const body = encodeURIComponent(`${shareText}\n\n${url}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    window.gtag('event', 'share', { method: 'email', archetype: archetype.name });
+  };
 }
 
 // Restart
 document.getElementById('restart-btn').addEventListener('click', () => {
-  state = { name: "", email: "", age: 0, ageTier: 1, currentQ: 0, answers: {}, scores: {}, startTime: null };
+  state = { name: "", email: "", phone: "", age: 0, ageTier: 1, parentConsent: false, currentQ: 0, answers: {}, scores: {}, startTime: null };
   nameInput.value = '';
   ageInput.value = '';
   emailInput.value = '';
+  phoneInput.value = '';
+  consentCheckbox.checked = false;
+  parentConsentBox.style.display = 'none';
   checkStartReady();
   showScreen('landing');
 });
