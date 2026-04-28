@@ -66,7 +66,7 @@
   window.EMAILJS_CONFIG = {
     PUBLIC_KEY: "L3DtsMzOelmmX8YhU",
     SERVICE_ID: "service_8ezd26e",
-    TEMPLATE_ID: "template_34bol3s",
+    TEMPLATE_ID: "template_34bol3sD",
     EMAIL_ENABLED: true  // set to true after configuring above
   };
 
@@ -981,9 +981,144 @@
     margin-top: 80px;
     font-size: 12px;
     letter-spacing: 0.1em;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .footer-tagline {
     text-transform: uppercase;
     opacity: 0.5;
-    text-align: center;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    text-transform: uppercase;
+  }
+
+  .footer-links a {
+    color: var(--ink);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .footer-links a:hover {
+    opacity: 1;
+    color: var(--accent);
+  }
+
+  .footer-sep {
+    opacity: 0.4;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 24, 21, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s;
+  }
+
+  .modal-backdrop.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-window {
+    background: var(--paper);
+    max-width: 720px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 48px;
+    position: relative;
+    border: 1px solid var(--line);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: var(--ink);
+    line-height: 1;
+    padding: 4px 12px;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover {
+    color: var(--accent);
+  }
+
+  .modal-content h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .modal-content .modal-meta {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .modal-content h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+
+  .modal-content p {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+    opacity: 0.85;
+  }
+
+  .modal-content ul {
+    margin: 8px 0 12px 20px;
+  }
+
+  .modal-content ul li {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+    opacity: 0.85;
+  }
+
+  .modal-content a {
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .modal-window { padding: 28px 20px; }
+    .modal-content h2 { font-size: 26px; }
   }
 
   /* Mobile */
@@ -1150,16 +1285,16 @@
 
       <div class="hero-stats">
         <div>
-          <div class="stat-num">36</div>
+          <div class="stat-num">42</div>
           <div class="stat-label">Carefully crafted questions</div>
         </div>
         <div>
-          <div class="stat-num">8</div>
+          <div class="stat-num">10</div>
           <div class="stat-label">Strength dimensions measured</div>
         </div>
         <div>
-          <div class="stat-num">12</div>
-          <div class="stat-label">Industry families explored</div>
+          <div class="stat-num" id="live-counter">—</div>
+          <div class="stat-label">People found their archetype</div>
         </div>
       </div>
 
@@ -1334,9 +1469,26 @@
 
 <footer class="footer">
   <div class="container">
-    Inner Compass · A self-discovery instrument · Results are guidance, not destiny
+    <div class="footer-content">
+      <div class="footer-tagline">Inner Compass · A self-discovery instrument · Results are guidance, not destiny</div>
+      <div class="footer-links">
+        <a href="#" id="privacy-link">Privacy Policy</a>
+        <span class="footer-sep">·</span>
+        <a href="#" id="terms-link">Terms of Service</a>
+        <span class="footer-sep">·</span>
+        <a href="#" id="contact-link">Contact</a>
+      </div>
+    </div>
   </div>
 </footer>
+
+<!-- Privacy/Terms Modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal-window">
+    <button class="modal-close" id="modal-close">×</button>
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -2482,6 +2634,60 @@ if (config.SAVE_RESULTS_ENABLED &&
     console.warn('Supabase init failed:', e);
   }
 }
+
+// ============ LIVE COUNTER ============
+async function updateLiveCounter() {
+  const counterEl = document.getElementById('live-counter');
+  if (!counterEl) return;
+
+  // Default fallback if Supabase isn't available
+  if (!supabaseClient) {
+    counterEl.textContent = '100+';
+    return;
+  }
+
+  try {
+    // Use a secure RPC function that returns ONLY the count
+    // (Cannot access user data via this function)
+    const { data, error } = await supabaseClient.rpc('get_test_count');
+
+    if (error) {
+      console.warn('Counter fetch failed:', error.message);
+      counterEl.textContent = '—';
+      return;
+    }
+
+    const displayCount = data || 0;
+
+    // Animate the counter from 0 → displayCount
+    animateCounter(counterEl, displayCount);
+  } catch (e) {
+    console.warn('Counter error:', e);
+    counterEl.textContent = '—';
+  }
+}
+
+function animateCounter(el, target) {
+  const duration = 1500;
+  const startTime = performance.now();
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease-out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+    el.textContent = current.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = target.toLocaleString();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// Update counter on page load
+setTimeout(updateLiveCounter, 500);
 
 // ============ LANDING SCREEN ============
 const nameInput = document.getElementById('user-name');
@@ -3701,6 +3907,159 @@ async function sendResultEmail(archetype, top, second, sortedScores) {
     console.warn('Email send failed:', e);
   }
 }
+
+// ============ PRIVACY / TERMS / CONTACT MODAL ============
+const LEGAL_CONTENT = {
+  privacy: `
+    <div class="modal-meta">— PRIVACY POLICY —</div>
+    <h2>Privacy Policy</h2>
+    <p><em>Last updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
+
+    <h3>What we collect</h3>
+    <p>When you take the Inner Compass test, we collect:</p>
+    <ul>
+      <li>Your name (or nickname)</li>
+      <li>Your age</li>
+      <li>Your email address</li>
+      <li>Your phone number (mandatory for adults 18+, optional for minors)</li>
+      <li>Your answers to the test questions</li>
+      <li>Your archetype results and dimension scores</li>
+      <li>Anonymous analytics (page visits, button clicks via Google Analytics)</li>
+    </ul>
+
+    <h3>How we use it</h3>
+    <ul>
+      <li>To generate your personalized test results</li>
+      <li>To send you your results via email</li>
+      <li>To improve the test based on aggregate (anonymous) patterns</li>
+      <li>We do <strong>not</strong> sell your data to third parties</li>
+      <li>We do <strong>not</strong> share your data with advertisers</li>
+    </ul>
+
+    <h3>Where it's stored</h3>
+    <p>Your data is stored on Supabase (a privacy-respecting database service). Email service is provided by EmailJS. Analytics by Google Analytics. All providers are bound by their respective privacy policies.</p>
+
+    <h3>Children's privacy (under 18)</h3>
+    <p>We require parent/guardian consent before minors can take the test, in accordance with India's Digital Personal Data Protection Act (DPDP Act, 2023). Phone numbers are optional for users under 18 to protect their privacy.</p>
+
+    <h3>Your rights</h3>
+    <p>You have the right to:</p>
+    <ul>
+      <li>Request a copy of your data</li>
+      <li>Request deletion of your data</li>
+      <li>Opt out of future emails</li>
+      <li>Withdraw consent at any time</li>
+    </ul>
+
+    <h3>Contact</h3>
+    <p>For privacy requests, email us at: <a href="mailto:contact@dotcodot.in">contact@dotcodot.in</a></p>
+
+    <p style="margin-top: 24px; font-size: 12px; opacity: 0.6;">This is a free, independently-built tool. We treat your data with the same care we'd want for our own.</p>
+  `,
+
+  terms: `
+    <div class="modal-meta">— TERMS OF SERVICE —</div>
+    <h2>Terms of Service</h2>
+    <p><em>Last updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
+
+    <h3>Acceptance</h3>
+    <p>By using Inner Compass, you agree to these terms. If you don't agree, please don't use the site.</p>
+
+    <h3>What we provide</h3>
+    <p>Inner Compass is a self-discovery psychometric test. It is provided "as is" without any guarantees of accuracy, completeness, or fitness for any particular purpose.</p>
+
+    <h3>What this test is NOT</h3>
+    <ul>
+      <li>It is <strong>not</strong> a clinical psychological assessment</li>
+      <li>It is <strong>not</strong> a substitute for professional career counseling</li>
+      <li>It is <strong>not</strong> a guarantee of career success or failure</li>
+      <li>The reasoning section is <strong>not</strong> a real IQ test (real IQ tests require licensed psychologists)</li>
+    </ul>
+
+    <h3>Acceptable use</h3>
+    <ul>
+      <li>Use the test honestly to learn about yourself</li>
+      <li>Do not use the site to harass, defame, or harm others</li>
+      <li>Do not attempt to attack, scrape, or overload our systems</li>
+      <li>Users under 18 require parent/guardian consent</li>
+    </ul>
+
+    <h3>Intellectual property</h3>
+    <p>The Inner Compass framework, questions, and content are the intellectual property of the project creator. You may share your individual results freely. You may not copy, redistribute, or commercially use the test framework without permission.</p>
+
+    <h3>Limitation of liability</h3>
+    <p>We are not liable for decisions you make based on test results. Career and life decisions should always involve trusted advisors, mentors, and your own careful reflection.</p>
+
+    <h3>Changes</h3>
+    <p>We may update these terms occasionally. Continued use after updates means you accept the new terms.</p>
+
+    <h3>Contact</h3>
+    <p>Questions? Email us at: <a href="mailto:contact@dotcodot.in">contact@dotcodot.in</a></p>
+  `,
+
+  contact: `
+    <div class="modal-meta">— GET IN TOUCH —</div>
+    <h2>Contact Us</h2>
+
+    <p>Have a question, feedback, partnership idea, or feature request? We'd love to hear from you.</p>
+
+    <h3>Email</h3>
+    <p><a href="mailto:contact@dotcodot.in">contact@dotcodot.in</a></p>
+
+    <h3>What we'd love to hear</h3>
+    <ul>
+      <li>Did the test feel accurate to you?</li>
+      <li>Was anything confusing or unclear?</li>
+      <li>What features would you want to see next?</li>
+      <li>Are you a school, college, or counselor interested in using this?</li>
+      <li>Did you find any bugs?</li>
+    </ul>
+
+    <h3>For schools and counselors</h3>
+    <p>We're working on group features for educational institutions. If you'd like early access or to discuss a partnership, please reach out.</p>
+
+    <h3>For privacy or data requests</h3>
+    <p>If you want to delete your data, get a copy of your data, or have any privacy concerns, email us with the subject line "Privacy Request" and we'll respond within 7 days.</p>
+
+    <p style="margin-top: 32px; font-size: 13px; opacity: 0.7;">Inner Compass is built with care, by hand, for people who want to know themselves better.</p>
+  `
+};
+
+const modalBackdrop = document.getElementById('modal-backdrop');
+const modalContent = document.getElementById('modal-content');
+const modalClose = document.getElementById('modal-close');
+
+function openModal(type) {
+  modalContent.innerHTML = LEGAL_CONTENT[type] || '';
+  modalBackdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  window.gtag('event', 'modal_opened', { type: type });
+}
+
+function closeModal() {
+  modalBackdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('privacy-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal('privacy');
+});
+document.getElementById('terms-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal('terms');
+});
+document.getElementById('contact-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal('contact');
+});
+modalClose.addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalBackdrop) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) closeModal();
+});
 
 // Initialize
 checkStartReady();
